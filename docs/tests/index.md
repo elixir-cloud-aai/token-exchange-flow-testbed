@@ -50,7 +50,7 @@ quit
 docker compose -f compose.lslogin.yaml down -v
 ```
 
-Then delete `lslogin.env`, and `results/` once you've taken what you need: it holds decoded claims of the accounts used. Fill in the Result column of each test's "What to record", take what you need into Results, and update the "To check" list of [proTES #391](https://github.com/elixir-cloud-aai/proTES/issues/391).
+Then delete `lslogin.env`, and `results/` once you've taken what you need: it holds decoded claims of the accounts used. Fill in the Result column of each test's "What to record", take what you need into [Results](../outcomes/results.md), and update the "To check" list of [proTES #391](https://github.com/elixir-cloud-aai/proTES/issues/391).
 
 To run the same against the mock, leave out `-f compose.lslogin.yaml`. Everything works, but see the table above for what it means.
 

@@ -1,6 +1,6 @@
 # Coverage
 
-Which test covers which requirement, by way of which part of the design. The ADR column stays empty until after the event: see the EOC adoption plan.
+Which test covers which requirement, by way of which part of the design. The ADR column stays empty until after the event: see the [EOC adoption plan](../outcomes/adoption.md).
 
 | Requirement | Design section | Test | ADR |
 |---|---|---|---|

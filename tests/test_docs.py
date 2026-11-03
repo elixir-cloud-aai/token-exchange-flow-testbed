@@ -142,6 +142,22 @@ def test_ls_login_first_appears_under_testbed() -> None:
         assert "LS Login" not in page.read_text(encoding="utf-8"), page.name
 
 
+def test_outcomes_are_empty_drafts() -> None:
+    """Until after the event, section 5 has boilerplate and empty tables only."""
+    pages = list((DOCS / "outcomes").glob("*.md"))
+    assert len(pages) == 5
+    for page in pages:
+        text = page.read_text(encoding="utf-8")
+        assert '!!! note "Draft, and empty until after the event"' in text, page.name
+        rows = [line.strip() for line in text.splitlines() if "|" in line]
+        assert rows, page.name
+        for header, separator, body in zip(
+            rows[::3], rows[1::3], rows[2::3], strict=True
+        ):
+            assert set(separator) <= {"|", "-"}, header
+            assert not body.replace("|", "").strip(), body
+
+
 def test_work_stream_is_called_by_its_former_name_only_once() -> None:
     """The Work Stream's former name appears once in all the docs."""
     texts = [page.read_text(encoding="utf-8") for page in DOCS.rglob("*.md")]

@@ -9,7 +9,7 @@ It's also the start of a blueprint: for how people and services prove who they a
 !!! warning "Nothing has run against LS Login yet"
     The `tb>` lines of these docs were executed on a local mock, except for `wait-expiry`, and some only up to a refusal or usage error. **The mock accepts almost everything**, so in local runs the testbed itself enforces LS Login's rules, as the LS Login team described them on 2026-11-03. A passing run shows that this code works and handles refusals. It says nothing about how LS Login behaves. See [Testbed limits](testbed/limits.md).
 
-This is a testbed and never for production: it reports why it refused a token, shows decoded claims and keeps no state. The Outcomes are empty until the tests have run.
+This is a testbed and never for production: it reports why it refused a token, shows decoded claims and keeps no state. The [Outcomes](outcomes/open-questions.md) are empty until the tests have run.
 
 ## Quick start
 
