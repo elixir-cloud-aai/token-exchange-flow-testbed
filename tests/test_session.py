@@ -676,11 +676,13 @@ def test_refresh_keeps_the_old_refresh_token_without_a_new_one(
     )
     held = session.tokens["user"].refresh_token
     assert held
-    assert session.execute("refresh r1 --as client --from user")["ok"]
+    result = session.execute("refresh r1 --as client --from user")
+    assert result["refresh_token"]["present"] is True
     assert session.tokens["r1"].refresh_token == held
     assert session.execute("introspect r1 --as client --refresh")["ok"]
     result = session.execute("refresh r2 --as client --from r1")
     assert result["ok"]
+    assert provider.posts[-1][1]["refresh_token"] == held
     assert result["refresh_token_rotated"] is None
     assert session.tokens["r2"].refresh_token == held
 
@@ -696,6 +698,9 @@ def test_refresh_token_issued_as_the_exchanged_token_is_usable(
     assert session.execute("refresh r --as orchestrator --from ro")["ok"]
     assert provider.posts[-1][1]["refresh_token"] == "opaque-refresh"
     assert session.execute("revoke ro --as orchestrator --refresh")["ok"]
+    revoked = provider.posts[-1][1]
+    assert revoked["token"] == "opaque-refresh"
+    assert revoked["token_type_hint"] == "refresh_token"
     assert (
         "is a refresh token"
         in session.execute("call gateway --token ro")["usage_error"]
@@ -752,3 +757,14 @@ def test_lifetimes_survive_times_of_the_wrong_type(
     assert rows["odd"]["seconds_left"] is None
     assert rows["odd"]["exp_minus_iat"] is None
     assert rows["user"]["seconds_left"] > 0
+
+
+def test_record_leaves_out_the_arguments_of_commands_that_cannot_run(
+    ls_settings: Settings, provider: FakeProvider, tmp_path: Path
+) -> None:
+    """An opaque token pasted in place of a name doesn't reach the record."""
+    record = tmp_path / "record.jsonl"
+    session = Session(ls_settings, provider, output=lambda _line: None, record=record)
+    session.execute("call gateway --token opaque-secret-value")
+    assert "opaque-secret-value" not in record.read_text(encoding="utf-8")
+    assert json.loads(record.read_text(encoding="utf-8"))["command"] == "call"

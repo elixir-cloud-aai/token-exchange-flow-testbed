@@ -336,7 +336,7 @@ class Session:
             UsageError: There's no such token.
         """
         if name not in self.tokens:
-            raise UsageError(f"No token '{name}'; have: {sorted(self.tokens)}")
+            raise UsageError(f"No token of that name; have: {sorted(self.tokens)}")
         return self.tokens[name]
 
     def _access_token(self, name: str) -> str:
@@ -526,14 +526,13 @@ class Session:
         )
         rotated = None if issued.refresh_token is None else issued.refresh_token != held
         # Without a new one, the old one stays valid (RFC 6749, section 6)
-        self.tokens[args.name] = replace(
-            issued, refresh_token=issued.refresh_token or held
-        )
+        stored = replace(issued, refresh_token=issued.refresh_token or held)
+        self.tokens[args.name] = stored
         return {
             "ok": True,
             "token": args.name,
             "refresh_token_rotated": rotated,
-            **issued.view(),
+            **stored.view(),
         }
 
     def _credentials(self, args: argparse.Namespace) -> dict[str, Any]:
@@ -815,11 +814,17 @@ class Session:
         """Append a result to the record, if any.
 
         Args:
-            line: Command line.
+            line: Command line. Without its arguments if it couldn't run, as
+                those may hold an opaque token that was pasted in by mistake.
             result: Scrubbed result.
         """
         if self._record is not None:
-            entry = {"time": int(time.time()), "command": scrub(line), "result": result}
+            command = line.split(maxsplit=1)[0] if "usage_error" in result else line
+            entry = {
+                "time": int(time.time()),
+                "command": scrub(command),
+                "result": result,
+            }
             with self._record.open("a", encoding="utf-8") as stream:
                 stream.write(json.dumps(entry) + "\n")
 
