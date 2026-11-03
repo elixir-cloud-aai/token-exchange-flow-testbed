@@ -22,5 +22,5 @@ Which test covers which requirement, by way of which part of the design. The ADR
 | [R-S11](../background/requirements.md#security-requirements) Following a request | [Attribution](../background/design.md#attribution) | T5 | |
 | [R-P1](../background/requirements.md#privacy-requirements) Only what's needed | [Authorization](../background/design.md#authorization) | T3 | |
 | [R-P2](../background/requirements.md#privacy-requirements) Stable reference | [Authentication](../background/design.md#authentication) | T4, by a second login | |
-| [R-P3](../background/requirements.md#privacy-requirements) Nothing in logs | [Attribution](../background/design.md#attribution) | Each end-to-end run (Checking the setup) | |
+| [R-P3](../background/requirements.md#privacy-requirements) Nothing in logs | [Attribution](../background/design.md#attribution) | Each end-to-end run ([Checking the setup](../setup/checking.md)) | |
 | [R-P4](../background/requirements.md#privacy-requirements) What's released | [Authorization](../background/design.md#authorization) | T1, the consent page only | |

@@ -73,16 +73,27 @@ nav:
   - Testbed design: testbed/design.md
   - Testbed limits: testbed/limits.md
   - Coverage: testbed/coverage.md
+- Setup:
+  - Requirements: setup/requirements.md
+  - Installation: setup/installation.md
+  - Configuration: setup/configuration.md
+  - Client registration: setup/client-registration.md
+  - Checking the setup: setup/checking.md
+  - Troubleshooting: setup/troubleshooting.md
+  - Optional, remote machines: setup/remote.md
+- About:
+  - Contact: about/contact.md
+  - Contributors: about/contributors.md
+  - Citation: about/citation.md
+  - License: about/license.md
+  - Acknowledgements: about/acknowledgements.md
+  - Contributing and development: about/development.md
+  - Glossary: about/glossary.md
+  - Commands: about/commands.md
+  - References: about/references.md
 - Tutorial:
   - tutorial/index.md
-  - Prepare accounts and clients: tutorial/prepare.md
-  - Run against the mock: tutorial/mock.md
   - Run against LS Login: tutorial/ls-login.md
   - Refused cases: tutorial/refused.md
-- Reference:
-  - Testbed commands: reference/commands.md
-  - Settings: reference/settings.md
 - Open questions: open-questions.md
 - Session with the LS Login team: session.md
-- Optional, remote machines: remote.md
-- Development: development.md

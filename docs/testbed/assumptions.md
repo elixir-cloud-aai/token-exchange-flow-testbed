@@ -25,7 +25,7 @@ Our own assumptions, from no statement at all:
 |---|---|
 | A11 | LS Login checks the signature and expiry of the subject token. The mock doesn't, so the testbed's rules do it for local runs. |
 | A12 | The value of `TESTBED_REQUIRED_ENTITLEMENT` in the template, `urn:geant:lifescience-ri.eu:group:elixir:ECP_CLN#aai.lifescience-ri.eu`. We derived it from a known entitlement of the same form. `ECP_CLN` is a configurable example. |
-| A13 | The client settings under Client registration, inferred from A1 to A10. We haven't gone through the whole registration app. |
+| A13 | The client settings under [Client registration](../setup/client-registration.md), inferred from A1 to A10. We haven't gone through the whole registration app. |
 
 ## Constraints
 

@@ -39,7 +39,7 @@ from testbed.validation import InvalidToken
 TRACE = "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
 # Pages with `tb>` lines. Each group runs in one session, in this order
 PAGE_GROUPS = (
-    ("tutorial/mock.md",),
+    ("setup/checking.md",),
     ("tutorial/ls-login.md", "tutorial/refused.md"),
     ("session.md",),
 )

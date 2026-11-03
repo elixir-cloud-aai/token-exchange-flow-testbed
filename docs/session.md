@@ -14,9 +14,9 @@ User -> client -> orchestrator (Conquest) -> gateway -> node
 
 ## Before the session
 
-1. **Accounts, clients and group release:** see [Prepare accounts and clients](tutorial/prepare.md). As early as possible, as we don't know whether registrations need approval.
+1. **Accounts, clients and group release:** see Prepare accounts and clients. As early as possible, as we don't know whether registrations need approval.
 2. **`lslogin.env`:** as on that page. Check the `ECP_CLN` entitlement in it: we derived that value from a known entitlement of the same form.
-3. **Prove your machine:** the [run against the mock](tutorial/mock.md#1-prove-your-machine) must end with all checks passed.
+3. **Prove your machine:** the run against the mock must end with all checks passed.
 4. **Try steps 1 to 5 once beforehand,** so that the session isn't spent on registration mistakes.
 
 ## In the session

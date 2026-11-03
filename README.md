@@ -26,9 +26,9 @@ Docs are written for Read the Docs (MkDocs Material), and readable here as Markd
 - [Home](docs/index.md)
 - [Background](docs/background/use-case.md): use case, requirements and design, independent of any product
 - [Testbed](docs/testbed/index.md): scope, assumptions and limits
-- Setup
+- [Setup](docs/setup/requirements.md)
 - Tests, with the questions for the LS Login team
 - Outcomes: empty until the tests have run
-- About
+- [About](docs/about/contact.md)
 
 Licence: [Apache-2.0](LICENSE). Never for production.

@@ -2,7 +2,7 @@
 
 Nothing on this page has been run yet. Every "Expected" comes from the LS Login team's answers of 2026-11-03 or the standards. Where the result differs, record it: that's what this run is for.
 
-Before you start: [accounts, clients and group release](prepare.md), `lslogin.env`, and a [passing run against the mock](mock.md).
+Before you start: accounts, clients and group release, `lslogin.env`, and a passing run against the mock.
 
 ## Start
 

@@ -1,21 +1,24 @@
-# Run against the mock
+# Checking the setup
 
-Needs Docker with Compose. No account, no Python on your machine, and no free ports: the mock is only reachable from the testbed's containers.
+Two checks against the mock. The first is automated, and the second teaches the commands.
 
 !!! warning "What this does and doesn't show"
-    The mock accepts almost everything, so `refused_by: testbed rule (mock only; not LS Login)` means that the testbed refused, by its own emulation of LS Login's rules. `aud` and `client_id` after an exchange come from our `mock/oidc.json`. So this run teaches the commands and shows that the code works. It's no evidence about LS Login. See What the mock can't show.
+    The mock accepts almost everything, so `refused_by: testbed rule (mock only; not LS Login)` means that the testbed refused, by its own emulation of LS Login's rules as its team described them on 2026-11-03. `aud` and `client_id` after an exchange come from our `mock/oidc.json`. So these checks show that the code works, and your machine can run it. They're no evidence about LS Login. See [Testbed limits](../testbed/limits.md).
 
-## 1. Prove your machine
+## The automated run
 
 ```sh
-docker compose build
 docker compose run --rm e2e
 docker compose down -v
 ```
 
-**Expected:** it ends with `51/51 checks passed`, in under a minute after the build. It starts the mock, runs all scenarios, and scans all output for tokens and secrets. The section `MOCK GAP` lists what the mock lets through.
+**Expected:** after the build, in under a minute, it ends with `N/N checks passed`, with the same number twice. It starts the mock, runs all scenarios, executes the `tb>` lines of these docs except for `wait-expiry` (some end in a refusal or a usage error, which counts as passing here), and scans all output for tokens and secrets. The section `MOCK GAP` lists what the mock lets through.
 
-## 2. Start a session
+## A session by hand
+
+About 15 minutes.
+
+### Start a session
 
 Start the services, then a session in the same terminal:
 
@@ -26,7 +29,7 @@ docker compose run --rm session
 
 Tokens exist only in the session's memory. To see what the services log, run `docker compose logs -f services` in a second terminal. The logs show decoded claims only. All results below are JSON; these listings only keep what matters.
 
-## 3. Check the provider
+### Check the provider
 
 ```text
 tb> clients
@@ -35,7 +38,7 @@ tb> discovery
 
 **Expected:** `provider: mock`, `ls_login_rules_emulated: true`, and six clients, including `loop`, which only exists on the mock. In `discovery`, `grant_types_supported` is `null`: the mock doesn't list them.
 
-## 4. Log in
+### Log in
 
 The mock's login form is filled in for you, with a made-up user.
 
@@ -50,7 +53,7 @@ tb> login user --as client
 "claims": {"sub": "test-user-inside", "aud": "tx-client", "client_id": "tx-client"}
 ```
 
-## 5. First hop: exchange for the gateway
+### First hop: exchange for the gateway
 
 ```text
 tb> exchange to-gw --as client --from user --audience @gateway
@@ -58,7 +61,7 @@ tb> exchange to-gw --as client --from user --audience @gateway
 
 `@gateway` stands for the gateway's client ID. **Expected:** `aud` is now `tx-gateway`, and `sub` hasn't changed.
 
-## 6. Two hops
+### Two hops
 
 ```text
 tb> call gateway --token to-gw --save direct
@@ -74,7 +77,7 @@ node     tx-node     tx-gateway 7          allowed  received
 
 `act` is `null` in both, and both have the same `traceparent`.
 
-## 7. Through the orchestrator
+### Through the orchestrator
 
 ```text
 tb> exchange to-orch --as client --from user --audience @orchestrator
@@ -83,15 +86,15 @@ tb> call orchestrator --token to-orch --save chained
 
 **Expected:** `status: 200` with three rows: `aud` changes at each, from `tx-orchestrator` to `tx-gateway` to `tx-node`.
 
-## 8. The case for `act`
+### What the node can tell
 
 ```text
 tb> compare direct chained
 ```
 
-**Expected:** `identical_at_last_hop: true`, `act_present: [false, false]`. The node saw the same claims on both paths. See What can't work yet.
+**Expected:** `identical_at_last_hop: true`, `act_present: [false, false]`. The node saw the same claims on both paths. See T5.
 
-## 9. Lifetimes
+### Lifetimes
 
 ```text
 tb> lifetimes
@@ -99,7 +102,7 @@ tb> lifetimes
 
 **Expected:** 3600 seconds for all. That's from our `mock/oidc.json`, so it's no evidence.
 
-## 10. What the rules refuse
+### What the rules refuse
 
 The rules of the LS Login team as the testbed emulates them, then the same without them:
 
@@ -112,7 +115,7 @@ tb> exchange bad --as client --from user --audience @gateway --tamper-subject --
 
 **Expected:** `ok: false` in the first three, each with `refused_by: testbed rule (mock only; not LS Login)` and the errors `invalid_grant`, `invalid_target` and `invalid_grant`. With `--no-rules`, the mock accepts the tampered token: `ok: true`.
 
-## 11. What the services refuse
+### What the services refuse
 
 ```text
 tb> exchange to-node --as gateway --from to-gw --audience @node
@@ -123,7 +126,7 @@ tb> call node --token to-node --tamper
 
 **Expected:** 200, then 401 with the reason `audience`, then 401 with the reason `signature`. These come from the services' own validation, and would be the same against any provider.
 
-## 12. A user outside the group
+### A user outside the group
 
 ```text
 tb> login b --as client --mock-user outside
@@ -133,7 +136,7 @@ tb> call gateway --token b-gw
 
 **Expected:** `status: 403`. The gateway passes the request on (`policy: off`), and the node refuses it (`policy: denied`, `refused: entitlement`). It's 403 and not 401, so that a portal can offer a way to get access.
 
-## 13. Hop limit
+### Hop limit
 
 ```text
 tb> call gateway --token to-gw --hop-limit 0
@@ -141,7 +144,7 @@ tb> call gateway --token to-gw --hop-limit 0
 
 **Expected:** `status: 508`, with `refused: hop limit`.
 
-## 14. Clean up
+### Clean up
 
 ```text
 tb> quit
@@ -151,4 +154,4 @@ tb> quit
 docker compose down -v
 ```
 
-To keep results, start the session with `--record /results/mock.jsonl` instead; see [Settings](../reference/settings.md#results).
+To keep results, start the session with `--record /results/mock.jsonl` instead; see [Configuration](configuration.md#results).
