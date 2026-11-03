@@ -31,38 +31,11 @@ def test_create_service_by_role(
     response = client.get("/report", headers={"Authorization": "Bearer nonsense"})
     assert response.status_code == 401
     assert response.get_json()["service"] == role
-    created: list[str] = []
-
-    def tracking(name: str) -> Any:
-        """Wrap a factory so that its use is noted.
-
-        Args:
-            name: Name of the factory in `testbed.serve`.
-
-        Returns:
-            The wrapped factory.
-        """
-        real = getattr(serve, name)
-
-        def factory(*args: Any, **kwargs: Any) -> Any:
-            """Note the use, then create the service.
-
-            Args:
-                *args: Arguments of the factory.
-                **kwargs: Arguments of the factory.
-
-            Returns:
-                The service.
-            """
-            created.append(name)
-            return real(*args, **kwargs)
-
-        return factory
-
-    for name in ("create_gateway", "create_node"):
-        monkeypatch.setattr(serve, name, tracking(name))
-    assert serve.create_service(mock_settings, role).name == role
-    assert created == ["create_gateway" if forwards else "create_node"]
+    monkeypatch.setattr(serve, "create_gateway", lambda *_args, **_kw: "gateway")
+    monkeypatch.setattr(serve, "create_node", lambda *_args, **_kw: "node")
+    expected = "gateway" if forwards else "node"
+    created: Any = serve.create_service(mock_settings, role)
+    assert created == expected
 
 
 def test_main_serves_the_role_on_its_port(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -674,10 +674,15 @@ def test_refresh_keeps_the_old_refresh_token_without_a_new_one(
     provider.routes[f"{base}/token"] = lambda _url, _kw: FakeResponse(
         200, {"access_token": provider.mint()}
     )
+    held = session.tokens["user"].refresh_token
+    assert held
     assert session.execute("refresh r1 --as client --from user")["ok"]
+    assert session.tokens["r1"].refresh_token == held
+    assert session.execute("introspect r1 --as client --refresh")["ok"]
     result = session.execute("refresh r2 --as client --from r1")
     assert result["ok"]
     assert result["refresh_token_rotated"] is None
+    assert session.tokens["r2"].refresh_token == held
 
 
 def test_refresh_token_issued_as_the_exchanged_token_is_usable(
@@ -715,6 +720,7 @@ def test_record_never_holds_a_token_from_the_command_line(
         "userinfo ro",
         "introspect ro --as orchestrator",
         "call gateway --token ro",
+        "wait-expiry ro",
     ],
 )
 def test_refresh_token_is_never_used_as_an_access_token(
@@ -735,3 +741,14 @@ def test_lifetimes_of_a_refresh_token(session: Session, provider: FakeProvider) 
     row = session.execute("lifetimes")["tokens"]["ro"]
     assert row["refresh_token"] is True
     assert row["exp_minus_iat"] is None
+
+
+def test_lifetimes_survive_times_of_the_wrong_type(
+    session: Session, provider: FakeProvider
+) -> None:
+    """One odd token doesn't cost the rows of the others."""
+    session.tokens["odd"] = TokenResponse(access_token=provider.mint(exp="soon"))
+    rows = session.execute("lifetimes")["tokens"]
+    assert rows["odd"]["seconds_left"] is None
+    assert rows["odd"]["exp_minus_iat"] is None
+    assert rows["user"]["seconds_left"] > 0

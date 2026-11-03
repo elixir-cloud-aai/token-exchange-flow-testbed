@@ -10,10 +10,10 @@ From the LS Login team, 2026-11-03: the lifetime is "currently 1 hour" ([A7](../
 
 ## Expectations
 
-1. Exchanged tokens live 1 hour. A login token of Krini's lived 4 hours on 2026-10-20, so login tokens may differ.
+1. Exchanged tokens live 1 hour. A login token of Krini's lived 4 hours on 2026-10-20 (our own observation), so login tokens may differ.
 2. Refreshing gives a new access token for the same `sub`.
 3. If `exp` of the refresh token moves by the time elapsed, the limit is idle. If it stays, absolute. If introspection shows no `exp` and the token is opaque, only the LS Login team can tell.
-4. Whether an exchange returns a refresh token is unknown. If it does, its access token has `aud` = gateway, the call gives 200, and the last refresh is refused after revocation. With a rotating token, it may already be refused earlier.
+4. Whether an exchange returns a refresh token is unknown. If it does, its access token has `aud` = gateway, the call gives 200, and the last refresh is refused after revocation.
 5. An expired token gets 401 with the reason `expired`, an exchange of it is refused by LS Login, and the refresh still works.
 
 ## Steps
@@ -32,7 +32,7 @@ tb> show r1
 
 ### Lifetimes
 
-Compare the login, exchanged and refreshed tokens. Then exchange from the login token, which is old by now: does the new token get a full lifetime, or only what the subject token has left? If the subject has expired, the exchange should be refused.
+Compare the login, exchanged and refreshed tokens. Then exchange from the login token, which is old by now: does the new token get a full lifetime, or only what the subject token has left? If the subject has expired, the exchange should be refused. If it's refused with `seconds_left` above zero, the refresh may have ended the old access token, which is a result of its own.
 
 ```text
 tb> lifetimes
@@ -67,9 +67,9 @@ Use the token that holds it in place of `ro`. A token issued as a refresh token 
 tb> refresh ro-a --as orchestrator --from ro
 tb> show ro-a
 tb> call gateway --token ro-a
-tb> refresh ro-b --as orchestrator --from ro --audience @gateway
-tb> revoke ro --as orchestrator --refresh
-tb> refresh ro-c --as orchestrator --from ro
+tb> refresh ro-b --as orchestrator --from ro-a --audience @gateway
+tb> revoke ro-b --as orchestrator --refresh
+tb> refresh ro-c --as orchestrator --from ro-b
 ```
 
 ### Expired token

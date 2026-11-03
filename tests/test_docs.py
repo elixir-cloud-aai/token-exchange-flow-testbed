@@ -98,6 +98,8 @@ def test_each_test_has_the_agreed_sections() -> None:
             "Questions it answers",
             "What to record",
         ], page.name
+        expectations = text.split("## Expectations")[1].split("## Steps")[0]
+        assert re.search(r"^1\. ", expectations, flags=re.MULTILINE), page.name
 
 
 def test_use_case_uses_no_solution_vocabulary() -> None:
@@ -147,7 +149,7 @@ def test_work_stream_is_called_by_its_former_name_only_once() -> None:
 
 
 def test_no_candidates_are_named_before_the_event() -> None:
-    """Nothing in the docs asks for `act` as a proposal yet."""
+    """The wording of earlier requests to LS Login stays out of the docs."""
     for page in DOCS.rglob("*.md"):
         text = page.read_text(encoding="utf-8")
         assert "What we'd ask for" not in text, page.name

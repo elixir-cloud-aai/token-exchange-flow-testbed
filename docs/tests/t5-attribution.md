@@ -13,7 +13,7 @@ From the LS Login team, 2026-11-03: `act` and `can_act` aren't supported, and ar
 1. **Provenance:** direct and through the orchestrator, the node sees the same claims: `identical_at_last_hop: true`, unless `client_id` differs, and `act_present: [false, false]`. So whether the orchestrator was involved can't be read from the token.
 2. **Accounting:** usage can't be attributed to a portal or workflow system from the token alone.
 3. **Loops:** a gateway can't find itself in the chain, so it can't refuse by identity. A hop limit of 0 gives 508 with `refused: hop limit`. With 1, the gateway forwards, and the next service sees a limit of 0.
-4. **Tracing:** all rows of a call have the same `traceparent`, and the services' logs show it.
+4. **Tracing:** all rows of a call have the same `traceparent`, and the logs of the services it passed show it.
 
 Hop limit and `traceparent` come from [proTES #391](https://github.com/elixir-cloud-aai/proTES/issues/391). Neither is signed, so any hop can reset them. They stop accidental loops and help with tracing. They prove nothing.
 
@@ -39,7 +39,7 @@ tb> call gateway --token to-gw5 --hop-limit 1
 ### Tracing
 
 ```text
-tb> call gateway --token to-gw5 --traceparent 00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01
+tb> call gateway --token to-gw5 --traceparent 00-1bf7651916cd43dd8448eb211c80319c-c7ad6b7169203331-01
 ```
 
 Then look for it in the services' logs:
@@ -52,7 +52,7 @@ docker compose -f compose.lslogin.yaml logs services
 
 ### Is `act` coming?
 
-The chain could then come from nested `act` ([RFC 8693, section 4.1](https://datatracker.ietf.org/doc/html/rfc8693#section-4.1)), set by LS Login from the exchanging client.
+The LS Login team says that it's under consideration (2026-11-03, [C1](../testbed/assumptions.md#constraints)). What the standard describes is nested `act` ([RFC 8693, section 4.1](https://datatracker.ietf.org/doc/html/rfc8693#section-4.1)), set by the identity provider.
 
 - **Yes:** the chain comes from nested `act` claims, and a gateway finding itself in the chain refuses the request. FOCA can read `act` as optional from the start, as that changes nothing today.
 - **No:** provenance and accounting stay in logs, with `traceparent`.
@@ -64,5 +64,5 @@ The chain could then come from nested `act` ([RFC 8693, section 4.1](https://dat
 | Provenance | `identical_at_last_hop`, `act_present`, and what differs | |
 | Accounting | `client_id` at the node on both paths | |
 | Hop limit | Status for 0 and 1 | |
-| Tracing | Whether the logs of all services show the same `traceparent` | |
+| Tracing | Whether the logs of the gateway and the node both show this `traceparent` | |
 | `act` | The LS Login team's answer | |

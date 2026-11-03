@@ -603,6 +603,8 @@ class Session:
                 {} if token.is_refresh_token else unverified_claims(token.access_token)
             )
             exp, iat = claims.get("exp"), claims.get("iat")
+            exp = exp if isinstance(exp, int) else None
+            iat = iat if isinstance(iat, int) else None
             rows[name] = {
                 "expires_in_stated_at_issue": token.expires_in,
                 "exp_minus_iat": exp - iat if exp and iat else None,
@@ -623,7 +625,7 @@ class Session:
         Raises:
             UsageError: The token has no `exp` claim.
         """
-        exp = unverified_claims(self._token(args.name).access_token).get("exp")
+        exp = unverified_claims(self._access_token(args.name)).get("exp")
         if not isinstance(exp, int):
             raise UsageError(f"'{args.name}' has no `exp` claim")
         seconds = exp + args.margin - time.time()
@@ -751,9 +753,10 @@ class Session:
         held = self._token(args.name)
         if not args.refresh:
             return self._access_token(args.name), "access_token"
-        if not held.usable_refresh_token:
+        refresh_token = held.usable_refresh_token
+        if not refresh_token:
             raise UsageError(f"'{args.name}' holds no refresh token")
-        return held.usable_refresh_token, "refresh_token"
+        return refresh_token, "refresh_token"
 
     def _introspect(self, args: argparse.Namespace) -> dict[str, Any]:
         """Run the `introspect` command.

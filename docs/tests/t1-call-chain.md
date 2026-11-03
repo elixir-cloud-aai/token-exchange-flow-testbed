@@ -115,7 +115,7 @@ The LS Login team says that both are validated (2026-11-03). The outcome decides
 
 ### Can public clients exchange?
 
-Discovery at `/oidc/` lists the auth method `none`, and at `/cas/oidc` doesn't. That says nothing about exchange.
+Discovery at `/oidc/` lists the auth method `none`, and at `/cas/oidc` doesn't ([What we've seen](../testbed/assumptions.md#what-weve-seen)). That says nothing about exchange.
 
 - **Yes:** Krini's backend can wait.
 - **No:** the backend comes with proTES 0.6.0, as #391 expects. No FOCA change either way.
