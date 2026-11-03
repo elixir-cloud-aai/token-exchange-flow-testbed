@@ -36,7 +36,7 @@ def test_all_commands_in_the_docs_parse(pages: tuple[str, ...]) -> None:
 
 def test_all_session_commands_are_documented() -> None:
     """The reference lists each command of the session."""
-    reference = (DOCS / "reference" / "commands.md").read_text(encoding="utf-8")
+    reference = (DOCS / "about" / "commands.md").read_text(encoding="utf-8")
     help_text = _build_parser().format_help()
     match = re.search(r"\{(.+?)\}", help_text)
     assert match is not None
@@ -53,7 +53,7 @@ def test_all_settings_are_read_and_documented() -> None:
         path.read_text(encoding="utf-8") for path in (ROOT / "src").rglob("*.py")
     )
     in_code = set(re.findall(r"\"(TESTBED_\w+)\"", code))
-    reference = (DOCS / "reference" / "settings.md").read_text(encoding="utf-8")
+    reference = (DOCS / "setup" / "configuration.md").read_text(encoding="utf-8")
     for name in in_template | in_code:
         assert f"`{name}`" in reference, name
     for name in in_template:

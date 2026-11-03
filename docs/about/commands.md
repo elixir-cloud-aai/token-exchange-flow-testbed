@@ -1,4 +1,4 @@
-# Testbed commands
+# Commands
 
 ## Starting things
 
@@ -68,11 +68,11 @@ Options that only make sense on the mock: `--mock-user`, `--mock-issuer` and `--
 
 ## Reasons a service gives
 
-With status 401, `reason` is one of `malformed`, `issuer`, `type`, `provider`, `key`, `signature`, `expired`, `audience` or `claims`. Other statuses:
+With status 401, `reason` is one of `missing`, `malformed`, `issuer`, `type`, `provider`, `key`, `signature`, `expired`, `audience` or `claims`. Other statuses:
 
 | Status | Meaning |
 |---|---|
 | 400 | Invalid `Hop-Limit` |
 | 403 | The node's policy: `refused: entitlement` |
-| 502 | The next hop couldn't be reached, or the exchange for it was refused: the row shows why |
+| 502 | The next hop couldn't be reached, the exchange for it was refused, or user info gave no answer (`refused: userinfo`): the row shows why |
 | 508 | The hop limit is used up |

@@ -25,7 +25,7 @@ On the mock, the client IDs are `tx-client` and so on, and there's a sixth, `loo
 
 ## Session
 
-An interactive command line that acts as the clients: it logs in, exchanges and calls services, and holds all tokens in memory. See Commands.
+An interactive command line that acts as the clients: it logs in, exchanges and calls services, and holds all tokens in memory. See [Commands](../about/commands.md).
 
 ## Mock
 
@@ -37,4 +37,4 @@ The identity provider under test, the [Life Science Login](https://lifescience-r
 
 ## Perun
 
-The identity management system behind LS Login. Facilities, resources, groups and VOs live here, and determine which entitlements a user gets ([A9, A10](assumptions.md)). See Client registration.
+The identity management system behind LS Login. Facilities, resources, groups and VOs live here, and determine which entitlements a user gets ([A9, A10](assumptions.md)). See [Client registration](../setup/client-registration.md#group-release).

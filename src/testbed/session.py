@@ -839,7 +839,7 @@ def _check_record(record: Path) -> None:
     except OSError as exc:
         raise SystemExit(
             f"Can't write {record}: {exc.strerror}. In a container, the folder "
-            "must be writable for its user; see docs/reference/settings.md."
+            "must be writable for its user; see docs/setup/configuration.md."
         ) from exc
 
 
