@@ -27,7 +27,7 @@ Docs are written for Read the Docs (MkDocs Material), and readable here as Markd
 - [Background](docs/background/use-case.md): use case, requirements and design, independent of any product
 - [Testbed](docs/testbed/index.md): scope, assumptions and limits
 - [Setup](docs/setup/requirements.md)
-- Tests, with the questions for the LS Login team
+- [Tests](docs/tests/index.md), with the questions for the LS Login team
 - Outcomes: empty until the tests have run
 - [About](docs/about/contact.md)
 

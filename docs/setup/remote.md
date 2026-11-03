@@ -2,7 +2,7 @@
 
 **Optional.** You don't need this: the testbed is meant to run on your own machine. **Nothing on this page has been tested.**
 
-If Docker runs on another machine, the login callback needs a way back to it. There are two ways, both only for the tests against LS Login. The mock needs neither, as it doesn't use a browser.
+If Docker runs on another machine, the login callback needs a way back to it. There are two ways, both only for the [tests against LS Login](../tests/index.md). The mock needs neither, as it doesn't use a browser.
 
 ## SSH tunnel
 

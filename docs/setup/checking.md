@@ -92,7 +92,7 @@ tb> call orchestrator --token to-orch --save chained
 tb> compare direct chained
 ```
 
-**Expected:** `identical_at_last_hop: true`, `act_present: [false, false]`. The node saw the same claims on both paths. See T5.
+**Expected:** `identical_at_last_hop: true`, `act_present: [false, false]`. The node saw the same claims on both paths. See [T5](../tests/t5-attribution.md).
 
 ### Lifetimes
 

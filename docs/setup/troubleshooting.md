@@ -18,7 +18,7 @@
 
 **The app refuses the localhost redirect URI.** Add `--flow device` to `login`, if the client has the device code flow registered. It has never been run against a real provider.
 
-**Access is denied after login.** The operator's [Access denied after login](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/1749647367/Access+denied+after+login) page lists general causes. For account B, this is a result: see T3.
+**Access is denied after login.** The operator's [Access denied after login](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/1749647367/Access+denied+after+login) page lists general causes. For account B, this is a result: see [T3](../tests/t3-groups.md).
 
 **The entitlements are missing for a member of the group.** Check the group release under [Client registration](client-registration.md#group-release), and don't deselect entitlements at the [consent page](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/1742536712/Understanding+consent+pages+when+logging+in). For what an account belongs to, see [Checking your membership](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/1742635055/Checking+your+membership).
 
