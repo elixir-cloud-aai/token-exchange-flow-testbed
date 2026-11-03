@@ -2,9 +2,11 @@ site_name: Token exchange testbed
 site_description: >-
   Trying per-hop token exchange with LS Login, on a local machine
 # Read the Docs serves each version under its own path. No URL is assumed here:
-# the variable is set in its builds. Set `repo_url` once the repository has a
-# home.
+# the variable is set in its builds.
 site_url: !ENV [READTHEDOCS_CANONICAL_URL, ""]
+repo_url: https://github.com/elixir-cloud-aai/token-exchange-flow-testbed
+repo_name: elixir-cloud-aai/token-exchange-flow-testbed
+edit_uri: edit/dev/docs/
 
 theme:
   name: material
