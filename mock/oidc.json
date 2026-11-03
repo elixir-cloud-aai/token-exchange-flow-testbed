@@ -1,0 +1,85 @@
+{
+  "interactiveLogin": true,
+  "tokenCallbacks": [
+    {
+      "issuerId": "testbed",
+      "tokenExpiry": 3600,
+      "requestMappings": [
+        {
+          "requestParam": "scope",
+          "match": "plain-jwt",
+          "typeHeader": "JWT",
+          "claims": {
+            "aud": [
+              "tx-node"
+            ],
+            "client_id": "${clientId}",
+            "sub": "${clientId}"
+          }
+        },
+        {
+          "requestParam": "grant_type",
+          "match": "client_credentials",
+          "typeHeader": "at+jwt",
+          "claims": {
+            "aud": [
+              "${clientId}"
+            ],
+            "client_id": "${clientId}",
+            "sub": "${clientId}"
+          }
+        },
+        {
+          "requestParam": "audience",
+          "match": "*",
+          "typeHeader": "at+jwt",
+          "claims": {
+            "aud": [
+              "${audience}"
+            ],
+            "client_id": "${clientId}"
+          }
+        },
+        {
+          "requestParam": "resource",
+          "match": "*",
+          "typeHeader": "at+jwt",
+          "claims": {
+            "aud": [
+              "${resource}"
+            ],
+            "client_id": "${clientId}"
+          }
+        },
+        {
+          "requestParam": "grant_type",
+          "match": "*",
+          "typeHeader": "at+jwt",
+          "claims": {
+            "aud": [
+              "${clientId}"
+            ],
+            "client_id": "${clientId}"
+          }
+        }
+      ]
+    },
+    {
+      "issuerId": "testbed-short",
+      "tokenExpiry": 2,
+      "requestMappings": [
+        {
+          "requestParam": "grant_type",
+          "match": "*",
+          "typeHeader": "at+jwt",
+          "claims": {
+            "aud": [
+              "${clientId}"
+            ],
+            "client_id": "${clientId}"
+          }
+        }
+      ]
+    }
+  ]
+}
