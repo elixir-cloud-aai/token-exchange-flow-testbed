@@ -1,13 +1,13 @@
 """Tests of `testbed.launcher`: processes and HTTP are replaced by fakes."""
 
 import subprocess
-from typing import Any
+from typing import Any, ClassVar
 
 import pytest
 import requests
 
 from testbed import launcher
-from testbed.settings import Settings
+from testbed.settings import SERVICE_PORTS, Settings
 
 
 class FakeProcess:
@@ -80,12 +80,13 @@ class FakeSession:
     """
 
     answers: list[int | Exception]
+    urls: ClassVar[list[str]] = []
 
-    def get(self, _url: str, **_options: Any) -> Any:
+    def get(self, url: str, **_options: Any) -> Any:
         """Answer a request.
 
         Args:
-            _url: URL.
+            url: URL.
             **_options: Options of the request.
 
         Returns:
@@ -94,6 +95,7 @@ class FakeSession:
         Raises:
             Exception: The next answer is an exception.
         """
+        FakeSession.urls.append(url)
         answer = self.answers.pop(0) if len(self.answers) > 1 else self.answers[0]
         if isinstance(answer, Exception):
             raise answer
@@ -132,10 +134,17 @@ def test_wait_until_healthy_retries(
 ) -> None:
     """Services that aren't up yet are asked again."""
     FakeSession.answers = [requests.ConnectionError(), 503, 200]
+    FakeSession.urls = []
     monkeypatch.setattr("requests.Session", FakeSession)
     monkeypatch.setattr("time.sleep", lambda _seconds: None)
-    launcher.Services(mock_settings, lambda _line: None).wait_until_healthy()
+    services = launcher.Services(mock_settings, lambda _line: None)
+    services.wait_until_healthy()
+    # The first service is asked three times, and all others once
     assert processes.started
+    ports = [SERVICE_PORTS[role] for role in services.roles]
+    assert FakeSession.urls == [
+        f"http://localhost:{port}/healthz" for port in [ports[0], ports[0], *ports]
+    ]
 
 
 def test_wait_until_healthy_gives_up(
@@ -147,9 +156,10 @@ def test_wait_until_healthy_gives_up(
     FakeSession.answers = [requests.ConnectionError()]
     monkeypatch.setattr("requests.Session", FakeSession)
     services = launcher.Services(mock_settings, lambda _line: None)
+    FakeSession.urls = []
     with pytest.raises(TimeoutError, match="gateway"):
         services.wait_until_healthy(timeout=-1)
-    assert processes.started
+    assert len(FakeSession.urls) == 1
 
 
 def test_main_runs_until_interrupted(

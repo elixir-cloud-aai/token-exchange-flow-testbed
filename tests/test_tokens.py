@@ -11,6 +11,7 @@ from testbed.tokens import (
     TYPE_REFRESH,
     Refused,
     TokenClient,
+    TokenResponse,
 )
 from tests.conftest import FakeProvider, FakeResponse
 
@@ -207,3 +208,8 @@ def test_client_credentials_and_revocation_without_options(
     assert "scope" not in provider.posts[-1][1]
     assert tokens.revoke(client, "value") == 200
     assert "token_type_hint" not in provider.posts[-1][1]
+
+
+def test_view_says_when_there_is_no_refresh_token() -> None:
+    """A response without a refresh token says so."""
+    assert TokenResponse(access_token="opaque").view()["refresh_token"] == "absent"

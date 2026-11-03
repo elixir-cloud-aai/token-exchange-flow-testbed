@@ -46,17 +46,17 @@ From the LS Login team, 2026-11-03 ([A9, A10](../testbed/assumptions.md#assumpti
 
 **To get a group entitlement,** assign the group to a resource on the service's facility. Krini does this with `ECP_CLN:ADMIN`. A client that needs admin mapping only needs that one group, not the whole `ECP_CLN` structure.
 
-**To let anyone with a valid LS Login account log in,** create a second resource for the Lifescience VO and assign its members group. Users outside `ECP_CLN` must be able to log in here, so that T3 shows a 403 from the node, and not a lockout.
+**To let anyone with a valid LS Login account log in,** create a second resource for the Lifescience VO and assign its members group. Users outside `ECP_CLN` must be able to log in here, so that [T3](../tests/t3-groups.md#account-b-must-not-be-locked-out) shows a 403 from the node, and not a lockout.
 
 For the test:
 
 1. On the facilities of `tx-test-client`, `tx-test-gateway` and `tx-test-node`, create a resource for the VO that holds the group, and assign the group.
-2. Don't do this for `tx-test-orchestrator`: its missing release is what T3 compares against.
-3. On the facilities of the clients that log in users, `tx-test-client` and `tx-test-public`, create the second resource for the Lifescience VO and assign its members group. Whether clients that only exchange need it, too, is a question for T3.
+2. Don't do this for `tx-test-orchestrator`: its missing release is what [T3](../tests/t3-groups.md#release-per-client) compares against.
+3. On the facilities of the clients that log in users, `tx-test-client` and `tx-test-public`, create the second resource for the Lifescience VO and assign its members group. Whether clients that only exchange need it, too, is [a question for T3](../tests/t3-groups.md#questions-it-answers).
 
 The operator's pages on this: [Create (and remove) a resource](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/670400518/Create+and+remove+a+resource), [How to assign a group(s) to a resource](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/212828196/How+to+assign+a+group+s+to+a+resource), [Entitlements](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/209813518/Entitlements), [Perun roles and their rights](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/1760100400/Perun+roles+and+their+rights).
 
 !!! warning "Known problem: \"Assign groups\""
-    This project's maintainer could open a facility and create a resource, but in "Assign groups" the Next button stays greyed out and no groups can be added, possibly because of a missing permission. Which role is needed is a question for the event. Until that's settled, ask the LS Login team to assign the groups, and otherwise go on without: T3 then shows what happens without a release.
+    This project's maintainer could open a facility and create a resource, but in "Assign groups" the Next button stays greyed out and no groups can be added, possibly because of a missing permission. [Which role is needed](../tests/t3-groups.md#questions-it-answers) is a question for the event. Until that's settled, ask the LS Login team to assign the groups, and otherwise go on without: T3 then shows what happens without a release.
 
-**Record:** the exact entitlement in user info (T3). Compare it with `TESTBED_REQUIRED_ENTITLEMENT`, whose example value we derived from a known entitlement of the same form.
+**Record:** the exact entitlement in user info ([T3](../tests/t3-groups.md)). Compare it with `TESTBED_REQUIRED_ENTITLEMENT`, whose example value we derived from a known entitlement of the same form.

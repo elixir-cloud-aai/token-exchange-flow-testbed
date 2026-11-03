@@ -30,5 +30,5 @@ It ends with `N/N checks passed`, with the same number twice: the mock, the serv
 - **To understand the idea:** [Use case](background/use-case.md), [Requirements](background/requirements.md), [Design](background/design.md). These don't depend on any product.
 - **To see what's being tested, and why:** [Testbed](testbed/index.md), then [Assumptions and constraints](testbed/assumptions.md) for what we know about LS Login.
 - **To try it on your machine:** [Checking the setup](setup/checking.md), by hand against the mock.
-- **To run it against LS Login, or for the LS Login team:** Tests, for the tests, their order and all questions.
+- **To run it against LS Login, or for the LS Login team:** [Tests](tests/index.md), for the tests, their order and all questions.
 - **To look something up:** [Commands](about/commands.md), [Configuration](setup/configuration.md), [Glossary](about/glossary.md), [References](about/references.md).

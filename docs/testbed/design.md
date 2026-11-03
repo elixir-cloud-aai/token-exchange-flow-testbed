@@ -31,7 +31,7 @@ sequenceDiagram
     P-->>K: Response
 ```
 
-With the orchestrator in the chain, the client exchanges for the orchestrator, and the orchestrator for the gateway. This diagram is the plan. Against LS Login, it's what the tests are meant to show, and nothing more so far.
+With the orchestrator in the chain, the client exchanges for the orchestrator, and the orchestrator for the gateway. This diagram is the plan. Against LS Login, it's what the [tests](../tests/index.md) are meant to show, and nothing more so far.
 
 ## What the services do
 

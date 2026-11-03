@@ -81,6 +81,13 @@ nav:
   - Checking the setup: setup/checking.md
   - Troubleshooting: setup/troubleshooting.md
   - Optional, remote machines: setup/remote.md
+- Tests:
+  - tests/index.md
+  - T1 Delegated call chain: tests/t1-call-chain.md
+  - T2 Refused requests: tests/t2-refused.md
+  - T3 Groups and entitlements: tests/t3-groups.md
+  - T4 Token lifetime and refresh: tests/t4-lifetime.md
+  - T5 Attribution across hops: tests/t5-attribution.md
 - About:
   - Contact: about/contact.md
   - Contributors: about/contributors.md
@@ -91,9 +98,3 @@ nav:
   - Glossary: about/glossary.md
   - Commands: about/commands.md
   - References: about/references.md
-- Tutorial:
-  - tutorial/index.md
-  - Run against LS Login: tutorial/ls-login.md
-  - Refused cases: tutorial/refused.md
-- Open questions: open-questions.md
-- Session with the LS Login team: session.md

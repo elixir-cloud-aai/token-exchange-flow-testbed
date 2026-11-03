@@ -8,6 +8,7 @@ import secrets
 # stops accidental loops only: a misbehaving hop can reset it.
 HOP_LIMIT_HEADER = "Hop-Limit"
 DEFAULT_HOP_LIMIT = 8
+MAX_DIGITS = 3
 TRACEPARENT_HEADER = "traceparent"
 _TRACEPARENT = re.compile(r"00-([0-9a-f]{32})-([0-9a-f]{16})-[0-9a-f]{2}")
 
@@ -23,7 +24,7 @@ def parse_hop_limit(value: str | None) -> int | None:
     """
     if value is None:
         return DEFAULT_HOP_LIMIT
-    if not value.isascii() or not value.isdigit():
+    if not value.isascii() or not value.isdigit() or len(value) > MAX_DIGITS:
         return None
     return int(value)
 

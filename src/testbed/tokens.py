@@ -84,6 +84,26 @@ class TokenResponse:
     scope: str | None = None
     issued_token_type: str | None = None
 
+    @property
+    def is_refresh_token(self) -> bool:
+        """Whether the issued token itself is a refresh token.
+
+        Returns:
+            True if the provider says so (RFC 8693, section 2.2.1).
+        """
+        return self.issued_token_type == TYPE_REFRESH
+
+    @property
+    def usable_refresh_token(self) -> str | None:
+        """Get the refresh token that this response holds, in either field.
+
+        Returns:
+            The refresh token, if any.
+        """
+        if self.refresh_token:
+            return self.refresh_token
+        return self.access_token if self.is_refresh_token else None
+
     def view(self) -> dict[str, Any]:
         """Create a view of the response that is safe to show.
 
@@ -98,8 +118,11 @@ class TokenResponse:
             "id_token": "present" if self.id_token else "absent",
             "refresh_token": "absent",
         }
-        if self.refresh_token:
-            view["refresh_token"] = {"present": True, **token_view(self.refresh_token)}
+        if self.usable_refresh_token:
+            view["refresh_token"] = {
+                "present": True,
+                **token_view(self.usable_refresh_token),
+            }
         return view
 
 

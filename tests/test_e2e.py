@@ -378,13 +378,12 @@ def test_docs_commands_pass(
     tmp_path: Path,
 ) -> None:
     """Commands that run pass, also if their result is a refusal."""
-    (docs / "session.md").write_text(
+    (docs / e2e.PAGE_GROUPS[0][0]).write_text(
         "tb> clients\ntb> wait-expiry never\ntb> show ro-a\n"
     )
     e2e._docs_commands(run, mock_settings, tmp_path / "record", docs)
     assert run.count == len(e2e.PAGE_GROUPS)
     assert run.failures == []
-    assert fake_http is not None
 
 
 @pytest.mark.parametrize(
@@ -399,11 +398,10 @@ def test_docs_commands_fail(
     page: str,
 ) -> None:
     """Commands that can't run fail, and so does a page group without commands."""
-    (docs / "session.md").write_text(page)
+    (docs / e2e.PAGE_GROUPS[0][0]).write_text(page)
     e2e._docs_commands(run, mock_settings, tmp_path / "record", docs)
     assert len(run.failures) == 1
-    assert "session.md" in run.failures[0]
-    assert fake_http is not None
+    assert e2e.PAGE_GROUPS[0][0] in run.failures[0]
 
 
 def test_leak_scan(run: Run, tmp_path: Path, provider: FakeProvider) -> None:
@@ -434,7 +432,6 @@ def test_run_scenarios_runs_all_of_them(
     run = e2e.run_scenarios(mock_settings, [], tmp_path / "record", docs)
     assert run.failures == []
     assert run.count > 40
-    assert fake_http is not None
 
 
 def test_ports_in_use() -> None:

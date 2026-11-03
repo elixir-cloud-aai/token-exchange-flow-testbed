@@ -25,7 +25,7 @@ ROLES = ("client", "public", "orchestrator", "gateway", "node", "loop")
 LS_LOGIN_REQUIRED_ROLES = ("client", "orchestrator", "gateway", "node")
 SERVICE_PORTS = {"gateway": 18991, "node": 18992, "orchestrator": 18993, "loop": 18995}
 NEXT_HOP = {"orchestrator": "gateway", "gateway": "node", "loop": "loop"}
-TARGET_PARAMS = ("audience", "resource", "both")
+TARGET_PARAMS = ("audience", "resource", "resource-url", "both")
 
 
 @dataclass(frozen=True)
@@ -62,7 +62,7 @@ class Settings:
         required_entitlement: Entitlement that the node requires, if any.
         entitlement_claims: User info claims that hold entitlements.
         target_param: Which parameters services name their next hop with in
-            exchanges: `audience`, `resource` or `both`.
+            exchanges: `audience`, `resource`, `resource-url` or `both`.
         exchange_scope: `scope` that services request in exchanges, if any.
         callback_bind: Address that the login callback listens on. `localhost`
             on a host; in a container, all interfaces, as its published port
@@ -145,7 +145,9 @@ def _mock_settings(env: Mapping[str, str]) -> Settings:
         issuer=MOCK_ISSUER,
         trusted_issuers=(MOCK_ISSUER, MOCK_SHORT_ISSUER),
         clients=clients,
-        required_entitlement=env.get("TESTBED_REQUIRED_ENTITLEMENT", MOCK_ENTITLEMENT),
+        required_entitlement=(
+            env.get("TESTBED_REQUIRED_ENTITLEMENT", MOCK_ENTITLEMENT) or None
+        ),
         target_param=_target_param(env),
         exchange_scope=env.get("TESTBED_EXCHANGE_SCOPE") or None,
         callback_bind=env.get("TESTBED_CALLBACK_BIND") or "localhost",
@@ -201,6 +203,14 @@ def _ls_login_settings(env: Mapping[str, str]) -> Settings:
                 env.get(f"{prefix}_CLIENT_SECRET") or None,
                 env.get(f"{prefix}_RESOURCE") or None,
             )
+    target_param = _target_param(env)
+    if target_param == "resource-url":
+        for role in set(NEXT_HOP.values()) & set(clients):
+            if not clients[role].resource:
+                raise ValueError(
+                    f"TESTBED_TARGET_PARAM=resource-url needs "
+                    f"TESTBED_{role.upper()}_RESOURCE"
+                )
     return Settings(
         provider=LS_LOGIN,
         issuer=issuer,
@@ -208,7 +218,7 @@ def _ls_login_settings(env: Mapping[str, str]) -> Settings:
         clients=clients,
         algorithms=tuple(env.get("TESTBED_ALGORITHMS", "RS256").split(",")),
         required_entitlement=env.get("TESTBED_REQUIRED_ENTITLEMENT") or None,
-        target_param=_target_param(env),
+        target_param=target_param,
         exchange_scope=env.get("TESTBED_EXCHANGE_SCOPE") or None,
         callback_bind=env.get("TESTBED_CALLBACK_BIND") or "localhost",
     )

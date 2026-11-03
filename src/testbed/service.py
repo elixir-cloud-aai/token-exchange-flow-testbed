@@ -23,6 +23,7 @@ HTTP_OK = 200
 HTTP_BAD_REQUEST = 400
 HTTP_UNAUTHORIZED = 401
 HTTP_FORBIDDEN = 403
+HTTP_BAD_GATEWAY = 502
 
 
 @dataclass
@@ -128,7 +129,12 @@ class Service:
         values: list[str] = []
         for claim in self.settings.entitlement_claims:
             found = userinfo.get(claim, [])
-            values.extend([found] if isinstance(found, str) else found)
+            found = [found] if isinstance(found, str) else found
+            if not isinstance(found, list) or not all(
+                isinstance(item, str) for item in found
+            ):
+                return {"values": [], "error": f"{claim} is not a list of strings"}
+            values.extend(found)
         return {"values": values}
 
     def check(self, headers: Any) -> RequestContext:
@@ -191,13 +197,14 @@ class Service:
         """Apply the service's entitlement policy to a request.
 
         A user without the entitlement is told so (403) rather than treated as
-        unauthenticated (401), so that portals can offer a way to get access.
+        unauthenticated (401), so that portals can offer a way to get access. If
+        user info gave no answer, nobody knows, so that isn't a 403 (502).
 
         Args:
             report: Report of the service, updated with the decision.
 
         Raises:
-            Stop: The user lacks the required entitlement.
+            Stop: The user lacks the entitlement, or it could not be determined.
         """
         required = self.settings.required_entitlement
         if not self.enforce_entitlement or required is None:
@@ -206,6 +213,9 @@ class Service:
         if required in report["entitlements"]["values"]:
             report["policy"] = "allowed"
             return
+        if "error" in report["entitlements"]:
+            report["policy"] = "unknown"
+            raise Stop(HTTP_BAD_GATEWAY, {**report, "refused": "userinfo"})
         report["policy"] = "denied"
         raise Stop(HTTP_FORBIDDEN, {**report, "refused": "entitlement"})
 

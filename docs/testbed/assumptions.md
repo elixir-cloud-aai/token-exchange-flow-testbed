@@ -1,6 +1,6 @@
 # Assumptions and constraints
 
-All LS Login specifics are on this page. Other pages refer to its numbers. None of this has been tested with exchanges yet, which is what the tests are for.
+All LS Login specifics are on this page. Other pages refer to its numbers. None of this has been tested with exchanges yet, which is what the [tests](../tests/index.md) are for.
 
 ## Assumptions
 
@@ -33,8 +33,8 @@ Our own assumptions, from no statement at all:
 |---|---|---|
 | C1 | No `act` or `can_act`. They're under consideration for the new stack. | The LS Login team, 2026-11-03 |
 | C2 | A service can only exchange a token that names it in `aud` (A3), and only for targets it has registered (A2). So each client lists its next hops, and proTES's client lists every TES node, by hand. | Follows from A2 and A3 |
-| C3 | The `aud` rule needs a client ID, whereas RFC 8707 resources are absolute URIs. If LS Login refuses a bare client ID as an indicator, or a token with only a URL in `aud` can't be exchanged again, chains can't work today. | Follows from A2 and A3, to be tested in T1 |
-| C4 | Because entitlements are computed for the exchanging client (A5), each exchanging client probably needs the group, too, not only the node. A node's token would then show what the gateway's facility releases. | Follows from A5, to be tested in T3 |
+| C3 | The `aud` rule needs a client ID, whereas RFC 8707 resources are absolute URIs. If LS Login refuses a bare client ID as an indicator, or a token with only a URL in `aud` can't be exchanged again, chains can't work today. | Follows from A2 and A3, to be [tested in T1](../tests/t1-call-chain.md) |
+| C4 | Because entitlements are computed for the exchanging client (A5), each exchanging client probably needs the group, too, not only the node. A node's token would then show what the gateway's facility releases. | Follows from A5, to be [tested in T3](../tests/t3-groups.md) |
 | C5 | Lifetimes can't be set per service, until the new stack. | The LS Login team, 2026-11-03 |
 | C6 | The operator's public documentation has nothing on token exchange or resource indicators, as far as we could find, and nothing on the flows of the registration app. | Our reading, 2026-11-03 |
 | C7 | The testbed is local: no public hosting. LS Login only sees your browser and the testbed's outgoing requests, and the redirect URI is `http://localhost:18994/callback`. | Our choice |
@@ -44,7 +44,7 @@ Our own assumptions, from no statement at all:
 
 ## What we've been unable to do
 
-"Assign groups" in Perun: this project's maintainer could open a facility and create a resource, but the Next button stays greyed out and no groups can be added, possibly because of a missing permission (seen by 2026-11-03). See T3.
+"Assign groups" in Perun: this project's maintainer could open a facility and create a resource, but the Next button stays greyed out and no groups can be added, possibly because of a missing permission (seen by 2026-11-03). See [T3](../tests/t3-groups.md#which-role-is-needed-to-assign-groups-to-a-resource).
 
 ## What public documents say
 
@@ -69,6 +69,6 @@ Public discovery documents, read on 2026-11-03, without credentials:
 | Scope `eduperson_entitlement` | listed | listed |
 | Scope `entitlements` | listed | not listed |
 
-The testbed uses `https://login.aai.lifescience-ri.eu/oidc/` by default. [A page on re-registration](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/2184773648/Service+Provider+Re-registration+for+use+LS+AAI+Eosc+compatible+AAI) names `https://login.aai.lifescience-ri.eu/cas/oidc` as the issuer for the LS AAI EOSC node, and says other production services still use the standard process. It doesn't say whether this is the new proxy stack, which is a question for the event. Being listed says nothing about what a given client may do.
+The testbed uses `https://login.aai.lifescience-ri.eu/oidc/` by default. [A page on re-registration](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/2184773648/Service+Provider+Re-registration+for+use+LS+AAI+Eosc+compatible+AAI) names `https://login.aai.lifescience-ri.eu/cas/oidc` as the issuer for the LS AAI EOSC node, and says other production services still use the standard process. It doesn't say whether this is the new proxy stack, which is [a question for the event](../tests/index.md#questions-outside-the-tests). Being listed says nothing about what a given client may do.
 
 A login token of Krini's, seen by us on 2026-10-20: `typ` was `at+jwt`, and `aud` held the client's ID.
