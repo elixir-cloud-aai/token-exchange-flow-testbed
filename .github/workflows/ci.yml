@@ -1,13 +1,13 @@
-# Everything that must pass on pull requests and pushes to `main`. Needs no
+# Everything that must pass on pull requests and pushes to `dev`. Needs no
 # secrets. No `paths:` filters, so that the gate always reports. The gate
 # `passed` ("CI passed") is the only check to require; add every new job to
 # its `needs`.
 name: CI
 on:
   push:
-    branches: [main]
+    branches: [dev]
   pull_request:
-    branches: [main]
+    branches: [dev]
 
 permissions:
   contents: read

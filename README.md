@@ -10,8 +10,8 @@ A small client, gateway and node for trying per-hop OAuth 2.0 token exchange wit
 Needs Docker with Compose, on Linux, macOS or WSL. So far it has only been run on Linux. No Python on your machine, and no free ports.
 
 ```sh
-git clone <URL of this repository> token_exchange_flow_testbed
-cd token_exchange_flow_testbed
+git clone https://github.com/elixir-cloud-aai/token-exchange-flow-testbed.git
+cd token-exchange-flow-testbed
 docker compose build
 docker compose run --rm e2e
 docker compose down -v
