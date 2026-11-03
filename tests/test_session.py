@@ -28,7 +28,7 @@ from testbed.settings import (
     NOT_REGISTERED,
     Settings,
 )
-from testbed.tokens import TokenResponse
+from testbed.tokens import TYPE_REFRESH, TokenResponse
 from tests.conftest import FakeProvider, FakeResponse
 
 
@@ -664,3 +664,74 @@ def test_parser_never_exits() -> None:
     """Argparse's way out would end the session and lose its tokens."""
     with pytest.raises(UsageError, match="the problem"):
         _build_parser().error("the problem")
+
+
+def test_refresh_keeps_the_old_refresh_token_without_a_new_one(
+    session: Session, provider: FakeProvider
+) -> None:
+    """Without rotation, the new entry can still be refreshed and introspected."""
+    base = provider.issuer.rstrip("/")
+    provider.routes[f"{base}/token"] = lambda _url, _kw: FakeResponse(
+        200, {"access_token": provider.mint()}
+    )
+    assert session.execute("refresh r1 --as client --from user")["ok"]
+    result = session.execute("refresh r2 --as client --from r1")
+    assert result["ok"]
+    assert result["refresh_token_rotated"] is None
+
+
+def test_refresh_token_issued_as_the_exchanged_token_is_usable(
+    session: Session, provider: FakeProvider
+) -> None:
+    """RFC 8693 returns a requested refresh token in `access_token`."""
+    session.tokens["ro"] = TokenResponse(
+        access_token="opaque-refresh", issued_token_type=TYPE_REFRESH
+    )
+    assert session.tokens["ro"].view()["refresh_token"]["present"] is True
+    assert session.execute("refresh r --as orchestrator --from ro")["ok"]
+    assert provider.posts[-1][1]["refresh_token"] == "opaque-refresh"
+    assert session.execute("revoke ro --as orchestrator --refresh")["ok"]
+    assert (
+        "is a refresh token"
+        in session.execute("call gateway --token ro")["usage_error"]
+    )
+
+
+def test_record_never_holds_a_token_from_the_command_line(
+    ls_settings: Settings, provider: FakeProvider, tmp_path: Path
+) -> None:
+    """A token pasted into a command is removed from the record."""
+    record = tmp_path / "record.jsonl"
+    session = Session(ls_settings, provider, output=lambda _line: None, record=record)
+    token = provider.mint()
+    session.execute(f"show {token}")
+    assert token not in record.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "exchange x --as gateway --from ro --audience @node",
+        "userinfo ro",
+        "introspect ro --as orchestrator",
+        "call gateway --token ro",
+    ],
+)
+def test_refresh_token_is_never_used_as_an_access_token(
+    session: Session, line: str
+) -> None:
+    """A token issued as a refresh token can only be redeemed."""
+    session.tokens["ro"] = TokenResponse(
+        access_token="opaque-refresh", issued_token_type=TYPE_REFRESH
+    )
+    assert "is a refresh token" in session.execute(line)["usage_error"]
+
+
+def test_lifetimes_of_a_refresh_token(session: Session, provider: FakeProvider) -> None:
+    """The times of a refresh token aren't those of an access token."""
+    session.tokens["ro"] = TokenResponse(
+        access_token=provider.mint(), issued_token_type=TYPE_REFRESH
+    )
+    row = session.execute("lifetimes")["tokens"]["ro"]
+    assert row["refresh_token"] is True
+    assert row["exp_minus_iat"] is None

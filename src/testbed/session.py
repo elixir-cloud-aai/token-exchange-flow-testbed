@@ -12,6 +12,7 @@ import sys
 import time
 import webbrowser
 from collections.abc import Callable
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, NoReturn
 
@@ -127,6 +128,7 @@ def hop_rows(report: dict[str, Any]) -> list[dict[str, Any]]:
                 "scope": claims.get("scope"),
                 "lifetime": current.get("lifetime", {}).get("exp_minus_iat"),
                 "entitlements": current.get("entitlements", {}).get("values"),
+                "entitlements_error": current.get("entitlements", {}).get("error"),
                 "policy": current.get("policy"),
                 "hop_limit": current.get("hop_limit"),
                 "trace_origin": current.get("trace", {}).get("origin"),
@@ -337,6 +339,24 @@ class Session:
             raise UsageError(f"No token '{name}'; have: {sorted(self.tokens)}")
         return self.tokens[name]
 
+    def _access_token(self, name: str) -> str:
+        """Get the access token of a token of the session.
+
+        Args:
+            name: Name of the token.
+
+        Returns:
+            The access token.
+
+        Raises:
+            UsageError: The token is a refresh token (RFC 8693 returns those in
+                the field `access_token`).
+        """
+        held = self._token(name)
+        if held.is_refresh_token:
+            raise UsageError(f"'{name}' is a refresh token: redeem it first")
+        return held.access_token
+
     def _resolve(self, target: str) -> str:
         """Resolve a shorthand for an audience or resource.
 
@@ -463,7 +483,7 @@ class Session:
         Returns:
             Result.
         """
-        subject = self._token(args.subject).access_token
+        subject = self._access_token(args.subject)
         if args.tamper_subject:
             subject = _tamper(subject)
         issued = self._provider.exchange(
@@ -494,20 +514,20 @@ class Session:
             UsageError: The token holds no refresh token.
         """
         holder = self._token(args.holder)
-        if not holder.refresh_token:
+        held = holder.usable_refresh_token
+        if not held:
             raise UsageError(f"'{args.holder}' holds no refresh token")
         issued = self._provider.refresh(
             self._client(args.role),
-            holder.refresh_token,
+            held,
             audience=[self._resolve(item) for item in args.audience],
             resource=[self._resolve(item) for item in args.resource],
             scope=args.scope,
         )
-        self.tokens[args.name] = issued
-        rotated = (
-            None
-            if issued.refresh_token is None
-            else issued.refresh_token != holder.refresh_token
+        rotated = None if issued.refresh_token is None else issued.refresh_token != held
+        # Without a new one, the old one stays valid (RFC 6749, section 6)
+        self.tokens[args.name] = replace(
+            issued, refresh_token=issued.refresh_token or held
         )
         return {
             "ok": True,
@@ -539,7 +559,7 @@ class Session:
             Result, with one row per service.
         """
         held = self._token(args.token)
-        token = held.access_token
+        token = self._access_token(args.token)
         if args.id_token:
             if not held.id_token:
                 raise UsageError(f"'{args.token}' holds no ID token")
@@ -579,13 +599,15 @@ class Session:
         now = int(time.time())
         rows = {}
         for name, token in self.tokens.items():
-            claims = unverified_claims(token.access_token)
+            claims = (
+                {} if token.is_refresh_token else unverified_claims(token.access_token)
+            )
             exp, iat = claims.get("exp"), claims.get("iat")
             rows[name] = {
                 "expires_in_stated_at_issue": token.expires_in,
                 "exp_minus_iat": exp - iat if exp and iat else None,
                 "seconds_left": exp - now if exp else None,
-                "refresh_token": bool(token.refresh_token),
+                "refresh_token": bool(token.usable_refresh_token),
             }
         return {"ok": True, "tokens": rows}
 
@@ -683,7 +705,7 @@ class Session:
         elif command == "userinfo":
             result = {
                 "ok": True,
-                **self._provider.userinfo(self._token(args.name).access_token),
+                **self._provider.userinfo(self._access_token(args.name)),
             }
         elif command == "introspect":
             result = {"ok": True, **self._introspect(args)}
@@ -728,10 +750,10 @@ class Session:
         """
         held = self._token(args.name)
         if not args.refresh:
-            return held.access_token, "access_token"
-        if not held.refresh_token:
+            return self._access_token(args.name), "access_token"
+        if not held.usable_refresh_token:
             raise UsageError(f"'{args.name}' holds no refresh token")
-        return held.refresh_token, "refresh_token"
+        return held.usable_refresh_token, "refresh_token"
 
     def _introspect(self, args: argparse.Namespace) -> dict[str, Any]:
         """Run the `introspect` command.
@@ -794,7 +816,7 @@ class Session:
             result: Scrubbed result.
         """
         if self._record is not None:
-            entry = {"time": int(time.time()), "command": line, "result": result}
+            entry = {"time": int(time.time()), "command": scrub(line), "result": result}
             with self._record.open("a", encoding="utf-8") as stream:
                 stream.write(json.dumps(entry) + "\n")
 

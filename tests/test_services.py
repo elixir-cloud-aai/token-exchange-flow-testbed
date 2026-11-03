@@ -170,24 +170,29 @@ def test_userinfo_of_another_subject_is_not_used(
         200, {"sub": "other", "eduperson_entitlement": [ENTITLEMENT]}
     )
     response = node.get("/report", headers=_bearer(provider.mint()))
-    assert response.status_code == 403
+    assert response.status_code == 502
     assert "another subject" in response.get_json()["entitlements"]["error"]
 
 
 @pytest.mark.parametrize("status", [401, 503])
-def test_failing_userinfo_denies_with_the_reason(
+def test_failing_userinfo_is_no_decision(
     node: FlaskClient, provider: FakeProvider, status: int
 ) -> None:
-    """Without user info, the node denies, and says why."""
+    """Without user info, nobody knows: not a 403, and the node says why."""
     base = provider.issuer.rstrip("/")
     provider.routes[f"{base}/userinfo"] = lambda _url, _kw: FakeResponse(status)
     response = node.get("/report", headers=_bearer(provider.mint()))
-    assert response.status_code == 403
-    assert response.get_json()["entitlements"]["error"]["status"] == status
+    assert response.status_code == 502
+    body = response.get_json()
+    assert body["refused"] == "userinfo"
+    assert body["policy"] == "unknown"
+    assert body["entitlements"]["error"]["status"] == status
 
 
-def test_unreachable_userinfo_denies(node: FlaskClient, provider: FakeProvider) -> None:
-    """Network problems with user info deny, too."""
+def test_unreachable_userinfo_is_no_decision(
+    node: FlaskClient, provider: FakeProvider
+) -> None:
+    """Network problems with user info are no decision, either."""
 
     def fail(_url: str, _options: dict[str, Any]) -> FakeResponse:
         """Fail like a network problem.
@@ -203,7 +208,7 @@ def test_unreachable_userinfo_denies(node: FlaskClient, provider: FakeProvider) 
 
     provider.routes[f"{provider.issuer.rstrip('/')}/userinfo"] = fail
     response = node.get("/report", headers=_bearer(provider.mint()))
-    assert response.status_code == 403
+    assert response.status_code == 502
     assert response.get_json()["entitlements"]["error"] == "user info request failed"
 
 
@@ -375,17 +380,40 @@ def test_logs_hold_no_tokens(
     ("param", "audience", "resource"),
     [
         ("audience", ["id-node"], []),
-        ("resource", [], ["https://node.example/"]),
+        ("resource", [], ["id-node"]),
+        ("resource-url", [], ["https://node.example/"]),
         ("both", ["id-node"], ["https://node.example/"]),
     ],
 )
 def test_targets(param: str, audience: list[str], resource: list[str]) -> None:
     """The setting chooses how the next hop is named."""
-    settings = load_settings({**LS_ENV, "TESTBED_TARGET_PARAM": param}, "lslogin")
+    settings = load_settings(
+        {
+            **LS_ENV,
+            "TESTBED_GATEWAY_RESOURCE": "https://gateway.example/",
+            "TESTBED_ORCHESTRATOR_RESOURCE": "https://orchestrator.example/",
+            "TESTBED_TARGET_PARAM": param,
+        },
+        "lslogin",
+    )
     assert targets(settings, settings.clients["node"]) == {
         "audience": audience,
         "resource": resource,
     }
+
+
+@pytest.mark.parametrize("value", [1, {"a": 1}, ["ok", 1]])
+def test_entitlements_of_the_wrong_type_are_an_error(
+    node: FlaskClient, provider: FakeProvider, value: Any
+) -> None:
+    """Odd values in user info are reported, and don't crash the node."""
+    base = provider.issuer.rstrip("/")
+    provider.routes[f"{base}/userinfo"] = lambda _url, _kw: FakeResponse(
+        200, {"sub": "user-1", "eduperson_entitlement": value}
+    )
+    response = node.get("/report", headers=_bearer(provider.mint(sub="user-1")))
+    assert response.status_code == 502
+    assert "not a list" in response.get_json()["entitlements"]["error"]
 
 
 def test_tokens_without_times_have_no_lifetime() -> None:

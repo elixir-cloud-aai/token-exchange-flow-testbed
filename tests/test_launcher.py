@@ -80,6 +80,7 @@ class FakeSession:
     """
 
     answers: list[int | Exception]
+    asked = 0
 
     def get(self, _url: str, **_options: Any) -> Any:
         """Answer a request.
@@ -94,6 +95,7 @@ class FakeSession:
         Raises:
             Exception: The next answer is an exception.
         """
+        FakeSession.asked += 1
         answer = self.answers.pop(0) if len(self.answers) > 1 else self.answers[0]
         if isinstance(answer, Exception):
             raise answer
@@ -132,10 +134,13 @@ def test_wait_until_healthy_retries(
 ) -> None:
     """Services that aren't up yet are asked again."""
     FakeSession.answers = [requests.ConnectionError(), 503, 200]
+    FakeSession.asked = 0
     monkeypatch.setattr("requests.Session", FakeSession)
     monkeypatch.setattr("time.sleep", lambda _seconds: None)
-    launcher.Services(mock_settings, lambda _line: None).wait_until_healthy()
-    assert processes.started
+    services = launcher.Services(mock_settings, lambda _line: None)
+    services.wait_until_healthy()
+    # Three answers for the first service, one each for the others
+    assert FakeSession.asked == 2 + len(processes.started)
 
 
 def test_wait_until_healthy_gives_up(
@@ -147,9 +152,10 @@ def test_wait_until_healthy_gives_up(
     FakeSession.answers = [requests.ConnectionError()]
     monkeypatch.setattr("requests.Session", FakeSession)
     services = launcher.Services(mock_settings, lambda _line: None)
+    FakeSession.asked = 0
     with pytest.raises(TimeoutError, match="gateway"):
         services.wait_until_healthy(timeout=-1)
-    assert processes.started
+    assert FakeSession.asked == 1
 
 
 def test_main_runs_until_interrupted(

@@ -40,8 +40,13 @@ TRACE = "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
 # Pages with `tb>` lines. Each group runs in one session, in this order
 PAGE_GROUPS = (
     ("setup/checking.md",),
-    ("tutorial/ls-login.md", "tutorial/refused.md"),
-    ("session.md",),
+    (
+        "tests/t1-call-chain.md",
+        "tests/t2-refused.md",
+        "tests/t3-groups.md",
+        "tests/t4-lifetime.md",
+        "tests/t5-attribution.md",
+    ),
 )
 
 

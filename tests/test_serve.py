@@ -1,6 +1,7 @@
 """Tests of `testbed.serve`."""
 
-from typing import Any
+from dataclasses import replace
+from typing import Any, cast
 
 import pytest
 
@@ -20,15 +21,48 @@ def test_http_client_ignores_proxies_for_the_mock_only(
     ("role", "forwards"), [("gateway", True), ("orchestrator", True), ("node", False)]
 )
 def test_create_service_by_role(
-    mock_settings: Settings, role: str, forwards: bool
+    mock_settings: Settings,
+    role: str,
+    forwards: bool,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Roles with a next hop are gateways; the others are nodes."""
     client = serve.create_service(mock_settings, role).test_client()
     response = client.get("/report", headers={"Authorization": "Bearer nonsense"})
     assert response.status_code == 401
     assert response.get_json()["service"] == role
+    created: list[str] = []
+
+    def tracking(name: str) -> Any:
+        """Wrap a factory so that its use is noted.
+
+        Args:
+            name: Name of the factory in `testbed.serve`.
+
+        Returns:
+            The wrapped factory.
+        """
+        real = getattr(serve, name)
+
+        def factory(*args: Any, **kwargs: Any) -> Any:
+            """Note the use, then create the service.
+
+            Args:
+                *args: Arguments of the factory.
+                **kwargs: Arguments of the factory.
+
+            Returns:
+                The service.
+            """
+            created.append(name)
+            return real(*args, **kwargs)
+
+        return factory
+
+    for name in ("create_gateway", "create_node"):
+        monkeypatch.setattr(serve, name, tracking(name))
     assert serve.create_service(mock_settings, role).name == role
-    assert (role in ("gateway", "orchestrator")) is forwards
+    assert created == ["create_gateway" if forwards else "create_node"]
 
 
 def test_main_serves_the_role_on_its_port(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -61,3 +95,30 @@ def test_main_serves_the_role_on_its_port(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.delenv("TESTBED_PROVIDER", raising=False)
     serve.main()
     assert calls == [("localhost", SERVICE_PORTS["node"])]
+
+
+def test_tokens_for_this_machine_never_go_through_a_proxy(
+    mock_settings: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Proxy settings apply to the provider, not to the local services."""
+    monkeypatch.setenv("https_proxy", "http://proxy.example:3128")
+    monkeypatch.setenv("http_proxy", "http://proxy.example:3128")
+    monkeypatch.delenv("no_proxy", raising=False)
+    monkeypatch.delenv("NO_PROXY", raising=False)
+    http = serve.create_http(replace(mock_settings, provider="lslogin"))
+
+    def proxies(url: Any) -> Any:
+        """Get the proxies that a request would use.
+
+        Args:
+            url: URL of the request.
+
+        Returns:
+            Proxies.
+        """
+        merge = cast(Any, http).merge_environment_settings
+        return merge(url, {}, None, None, None)["proxies"]
+
+    assert proxies("http://localhost:18991/report") == {}
+    assert proxies("https://provider.example/token")["https"].endswith(":3128")
+    assert proxies(b"http://localhost:18991/report")["http"].endswith(":3128")

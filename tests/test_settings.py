@@ -64,3 +64,21 @@ def test_callback_listens_on_localhost_unless_told_otherwise(
     assert load_settings(env, provider).callback_bind == "localhost"
     bound = load_settings({**env, "TESTBED_CALLBACK_BIND": "192.0.2.1"}, provider)
     assert bound.callback_bind == "192.0.2.1"
+
+
+def test_empty_required_entitlement_means_no_policy() -> None:
+    """On the mock, as with LS Login, an empty value turns the policy off."""
+    settings = load_settings({"TESTBED_REQUIRED_ENTITLEMENT": ""}, "mock")
+    assert settings.required_entitlement is None
+
+
+def test_resource_url_needs_the_urls_of_the_next_hops() -> None:
+    """Without a URL, an exchange would go out with no target at all."""
+    env = {**LS_ENV, "TESTBED_TARGET_PARAM": "resource-url"}
+    env.pop("TESTBED_NODE_RESOURCE", None)
+    env.pop("TESTBED_GATEWAY_RESOURCE", None)
+    with pytest.raises(ValueError, match="_RESOURCE"):
+        load_settings(env, "lslogin")
+    env["TESTBED_NODE_RESOURCE"] = "https://node.example/"
+    env["TESTBED_GATEWAY_RESOURCE"] = "https://gateway.example/"
+    assert load_settings(env, "lslogin").target_param == "resource-url"

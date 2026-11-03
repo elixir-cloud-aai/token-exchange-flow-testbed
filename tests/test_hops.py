@@ -17,6 +17,9 @@ VALID = "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
         ("x", None),
         ("", None),
         ("٣", None),
+        ("999", 999),
+        ("1000", None),
+        ("1" * 5000, None),
     ],
 )
 def test_parse_hop_limit(value: str | None, expected: int | None) -> None:

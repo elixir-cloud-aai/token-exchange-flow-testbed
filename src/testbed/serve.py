@@ -3,7 +3,9 @@
 import logging
 import os
 import sys
-from typing import cast
+from collections.abc import MutableMapping
+from typing import Any, cast
+from urllib.parse import urlsplit
 
 import requests
 from flask import Flask
@@ -15,6 +17,41 @@ from testbed.settings import MOCK, NEXT_HOP, SERVICE_PORTS, Settings, load_setti
 from testbed.validation import HttpClient
 
 
+class _DirectToLocalhost(requests.Session):
+    """HTTP client that never sends requests for this machine through a proxy.
+
+    Calls between the services and the session carry bearer tokens in cleartext,
+    on the loopback interface. Proxy settings still apply to the provider.
+    """
+
+    def merge_environment_settings(
+        self,
+        url: str | bytes | None,
+        proxies: MutableMapping[str, str] | None,
+        stream: bool | None,
+        verify: bool | str | None,
+        cert: str | tuple[str, str] | None,
+    ) -> Any:
+        """Add the settings from the environment, except for local URLs.
+
+        Args:
+            url: URL of the request.
+            proxies: Proxies of the request.
+            stream: Whether the response is streamed.
+            verify: How TLS certificates are verified.
+            cert: Client certificate.
+
+        Returns:
+            Settings of the request.
+        """
+        merged: Any = super().merge_environment_settings(
+            url, proxies, stream, verify, cert
+        )
+        if isinstance(url, str) and urlsplit(url).hostname == "localhost":
+            merged["proxies"] = {}
+        return merged
+
+
 def create_http(settings: Settings) -> HttpClient:
     """Create the HTTP client of the testbed.
 
@@ -24,7 +61,7 @@ def create_http(settings: Settings) -> HttpClient:
     Returns:
         HTTP client; ignores proxy settings for the mock, which is local.
     """
-    http = requests.Session()
+    http = _DirectToLocalhost()
     http.trust_env = settings.provider != MOCK
     return cast(HttpClient, http)
 

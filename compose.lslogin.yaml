@@ -53,7 +53,7 @@ services:
     <<: *testbed
     profiles: [tools]
     entrypoint: [testbed-session]
-    network_mode: service:services
+    network_mode: service:network
     depends_on:
       services:
         condition: service_healthy

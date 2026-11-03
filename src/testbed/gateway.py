@@ -10,6 +10,7 @@ from flask import Flask, Response, request
 
 from testbed.hops import HOP_LIMIT_HEADER, TRACEPARENT_HEADER
 from testbed.service import (
+    HTTP_BAD_GATEWAY,
     RequestContext,
     Service,
     Stop,
@@ -20,7 +21,6 @@ from testbed.settings import NEXT_HOP, Client, Settings
 from testbed.tokens import Refused, TokenResponse
 from testbed.validation import TIMEOUT, HttpClient, InvalidToken
 
-HTTP_BAD_GATEWAY = 502
 HTTP_LOOP_DETECTED = 508
 
 
@@ -34,13 +34,15 @@ def targets(settings: Settings, next_client: Client) -> dict[str, list[str]]:
     Returns:
         Arguments `audience` and `resource` for an exchange.
     """
-    audience = [next_client.client_id]
-    resource = [next_client.resource] if next_client.resource else []
+    client_id = [next_client.client_id]
+    url = [next_client.resource] if next_client.resource else []
     if settings.target_param == "audience":
-        return {"audience": audience, "resource": []}
+        return {"audience": client_id, "resource": []}
     if settings.target_param == "resource":
-        return {"audience": [], "resource": resource}
-    return {"audience": audience, "resource": resource}
+        return {"audience": [], "resource": client_id}
+    if settings.target_param == "resource-url":
+        return {"audience": [], "resource": url}
+    return {"audience": client_id, "resource": url}
 
 
 def _forward(
