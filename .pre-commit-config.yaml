@@ -1,0 +1,56 @@
+# Checks run on commit (`pre-commit install`) and in CI (`pre-commit run
+# --all-files`); hook versions are pinned to commits, as in the repositories of
+# elixir-cloud-aai
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-yaml
+        # `mkdocs.yml` uses tags of MkDocs (the docs build checks it)
+        exclude: ^mkdocs\.yml$
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 25bcf95026b96e2dd3c0aec3090c3d6ef6ca2e6c  # frozen: v0.17.3
+    hooks:
+      - id: ruff-check
+      - id: ruff-format
+  # Public rule set, no rules of this project; downloaded from the Semgrep
+  # registry, without an account
+  - repo: https://github.com/semgrep/pre-commit
+    rev: dfdeebdd309a043859ba33a555839911e7b11801  # frozen: v1.182.1
+    hooks:
+      - id: semgrep
+        types: [python]
+        # Parallel runs, each downloading the rule set, fail at random
+        require_serial: true
+        args:
+          - --config=p/python
+          - --error
+          - --metrics=off
+          - --disable-version-check
+          - --quiet
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e  # frozen: v8.30.1
+    hooks:
+      - id: gitleaks
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca  # frozen: v1.7.12
+    hooks:
+      - id: actionlint
+  - repo: local
+    hooks:
+      # Local hooks use the installed `dev` extra of `pyproject.toml`
+      - id: ast-grep
+        name: ast-grep
+        entry: ast-grep scan
+        language: system
+        types: [python]
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        types: [python]
+        pass_filenames: false

@@ -1,0 +1,3 @@
+# ast-grep (`ast-grep scan`, run by pre-commit). No rules of this project yet;
+# add a folder here once there are any
+ruleDirs: []
