@@ -148,8 +148,9 @@ def test_outcomes_are_empty_drafts() -> None:
     assert len(pages) == 5
     for page in pages:
         text = page.read_text(encoding="utf-8")
-        assert "Draft" in text, page.name
-        rows = [line for line in text.splitlines() if line.startswith("|")]
+        assert '!!! note "Draft, and empty until after the event"' in text, page.name
+        rows = [line.strip() for line in text.splitlines() if "|" in line]
+        assert rows, page.name
         for header, separator, body in zip(
             rows[::3], rows[1::3], rows[2::3], strict=True
         ):
