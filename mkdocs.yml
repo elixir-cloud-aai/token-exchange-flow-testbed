@@ -1,0 +1,79 @@
+site_name: Token exchange testbed
+site_description: >-
+  Trying per-hop token exchange with LS Login, on a local machine
+# Read the Docs serves each version under its own path. No URL is assumed here:
+# the variable is set in its builds. Set `repo_url` once the repository has a
+# home.
+site_url: !ENV [READTHEDOCS_CANONICAL_URL, ""]
+
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - navigation.footer
+    - navigation.indexes
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+nav:
+  - Home: index.md
+  - Concepts:
+      - The flow: concepts/flow.md
+      - What LS Login requires: concepts/ls-login.md
+      - What can't work yet: concepts/limits.md
+  - Tutorial:
+      - tutorial/index.md
+      - Prepare accounts and clients: tutorial/prepare.md
+      - Run against the mock: tutorial/mock.md
+      - Run against LS Login: tutorial/ls-login.md
+      - Refused cases: tutorial/refused.md
+  - Reference:
+      - Testbed commands: reference/commands.md
+      - Settings: reference/settings.md
+      - What the mock can't show: reference/mock.md
+  - Open questions: open-questions.md
+  - Session with the LS Login team: session.md
+  - Optional, remote machines: remote.md
+  - Development: development.md
