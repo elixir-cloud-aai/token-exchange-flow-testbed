@@ -17,7 +17,7 @@ MOCK_SHORT_ISSUER = "http://localhost:18990/testbed-short"
 MOCK_ROGUE_ISSUER = "http://localhost:18990/rogue"
 MOCK_ENTITLEMENT = "urn:example:testbed:group:compute"
 CALLBACK_PORT = 18994
-# The mock accepts any secret, see docs/reference/mock.md
+# The mock accepts any secret, see docs/testbed/limits.md
 DUMMY_SECRET = "testbed-dummy-secret"
 NOT_REGISTERED = "https://not-registered.testbed.invalid/"
 

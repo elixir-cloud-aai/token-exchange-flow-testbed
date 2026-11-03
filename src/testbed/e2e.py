@@ -2,7 +2,7 @@
 
 Uses the same command lines as the docs. Passing shows that OUR code works and
 handles refusals. It says nothing about LS Login: see the MOCK GAP section of
-the output and docs/reference/mock.md.
+the output and docs/testbed/limits.md.
 """
 
 import json
@@ -321,7 +321,7 @@ def _mock_gaps(run: Run, session: Session) -> None:
     """Show what the mock itself lets through, with the testbed's rules off.
 
     If one of these starts failing, the mock's behaviour changed: update
-    docs/reference/mock.md and the tutorial.
+    docs/testbed/limits.md and the tests.
 
     Args:
         run: The run.
