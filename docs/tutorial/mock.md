@@ -3,7 +3,7 @@
 Needs Docker with Compose. No account, no Python on your machine, and no free ports: the mock is only reachable from the testbed's containers.
 
 !!! warning "What this does and doesn't show"
-    The mock accepts almost everything, so `refused_by: testbed rule (mock only; not LS Login)` means that the testbed refused, by its own emulation of LS Login's rules. `aud` and `client_id` after an exchange come from our `mock/oidc.json`. So this run teaches the commands and shows that the code works. It's no evidence about LS Login. See [What the mock can't show](../reference/mock.md).
+    The mock accepts almost everything, so `refused_by: testbed rule (mock only; not LS Login)` means that the testbed refused, by its own emulation of LS Login's rules. `aud` and `client_id` after an exchange come from our `mock/oidc.json`. So this run teaches the commands and shows that the code works. It's no evidence about LS Login. See What the mock can't show.
 
 ## 1. Prove your machine
 
@@ -89,7 +89,7 @@ tb> call orchestrator --token to-orch --save chained
 tb> compare direct chained
 ```
 
-**Expected:** `identical_at_last_hop: true`, `act_present: [false, false]`. The node saw the same claims on both paths. See [What can't work yet](../concepts/limits.md).
+**Expected:** `identical_at_last_hop: true`, `act_present: [false, false]`. The node saw the same claims on both paths. See What can't work yet.
 
 ## 9. Lifetimes
 

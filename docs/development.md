@@ -54,6 +54,6 @@ Everything talks over `localhost`, in containers as on a host, so tokens have th
 
 ## Mock configuration
 
-`mock/oidc.json` sets what the mock puts in tokens. Remember that this is why `aud` and `client_id` look right on the mock: see [What the mock can't show](reference/mock.md).
+`mock/oidc.json` sets what the mock puts in tokens. Remember that this is why `aud` and `client_id` look right on the mock: see What the mock can't show.
 
 If a `MOCK GAP` check starts to fail, the mock's behaviour changed: update that page and the tutorial.

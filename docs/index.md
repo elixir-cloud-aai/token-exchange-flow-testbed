@@ -3,7 +3,7 @@
 A small client, gateway and node for trying per-hop OAuth 2.0 token exchange with [LS Login](https://lifescience-ri.eu/ls-login/), on a local machine, without public hosting. It exists to answer one question: can the chain of ELIXIR On-Cloud services, Krini -> Conquest -> proTES -> TES nodes, carry a user's identity with tokens that are only good for the next service?
 
 !!! warning "Status: nothing has run against LS Login yet"
-    All commands have only run against a local mock. **The mock accepts almost everything**, so in local runs the testbed itself enforces LS Login's rules, as the LS Login team described them. A passing run shows that this code works and handles refusals. It says nothing about how LS Login behaves. See [What the mock can't show](reference/mock.md).
+    All commands have only run against a local mock. **The mock accepts almost everything**, so in local runs the testbed itself enforces LS Login's rules, as the LS Login team described them. A passing run shows that this code works and handles refusals. It says nothing about how LS Login behaves. See What the mock can't show.
 
 ## Why
 
@@ -21,7 +21,7 @@ The group policy at the node uses `ECP_CLN` as a configurable example.
 
 ## Where to go
 
-- **[Concepts](concepts/flow.md):** the flow, what LS Login requires, and what can't work yet.
+- **Concepts:** the flow, what LS Login requires, and what can't work yet.
 - **[Tutorial](tutorial/index.md):** accounts and clients, the mock first, then LS Login.
 - **[Reference](reference/commands.md):** commands, settings, and the limits of the mock.
 - **[Open questions](open-questions.md):** everything we don't know, for the LS Login team, with what each answer changes.

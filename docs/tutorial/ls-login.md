@@ -215,7 +215,7 @@ tb> refresh ro-c --as orchestrator --from ro
 tb> compare direct chained
 ```
 
-**Expected:** `identical_at_last_hop: true`, unless `client_id` differs, and `act_present: [false, false]`. Direct and through the orchestrator, the node sees the same claims. See [What can't work yet](../concepts/limits.md).
+**Expected:** `identical_at_last_hop: true`, unless `client_id` differs, and `act_present: [false, false]`. Direct and through the orchestrator, the node sees the same claims. See What can't work yet.
 
 Go on with the [refused cases](refused.md), in the same session.
 
