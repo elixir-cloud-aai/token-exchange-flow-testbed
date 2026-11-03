@@ -1,0 +1,20 @@
+# Client secrets and results of runs: never commit these
+.env
+.env.*
+*.env
+!*.env.example
+results/*
+!results/.gitkeep
+
+# Python and tools
+__pycache__/
+.venv/
+.coverage
+coverage.xml
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+dist/
+
+# Docs build
+site/
