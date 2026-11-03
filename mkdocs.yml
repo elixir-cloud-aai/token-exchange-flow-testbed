@@ -11,6 +11,7 @@ edit_uri: edit/dev/docs/
 theme:
   name: material
   features:
+    - content.action.edit
     - content.code.copy
     - navigation.footer
     - navigation.indexes
