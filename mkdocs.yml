@@ -61,22 +61,26 @@ validation:
   anchors: warn
 
 nav:
-  - Home: index.md
-  - Concepts:
-      - The flow: concepts/flow.md
-      - What LS Login requires: concepts/ls-login.md
-      - What can't work yet: concepts/limits.md
-  - Tutorial:
-      - tutorial/index.md
-      - Prepare accounts and clients: tutorial/prepare.md
-      - Run against the mock: tutorial/mock.md
-      - Run against LS Login: tutorial/ls-login.md
-      - Refused cases: tutorial/refused.md
-  - Reference:
-      - Testbed commands: reference/commands.md
-      - Settings: reference/settings.md
-      - What the mock can't show: reference/mock.md
-  - Open questions: open-questions.md
-  - Session with the LS Login team: session.md
-  - Optional, remote machines: remote.md
-  - Development: development.md
+- Home: index.md
+- Background:
+  - Use case: background/use-case.md
+  - Requirements: background/requirements.md
+  - Design: background/design.md
+- Concepts:
+  - The flow: concepts/flow.md
+  - What LS Login requires: concepts/ls-login.md
+  - What can't work yet: concepts/limits.md
+- Tutorial:
+  - tutorial/index.md
+  - Prepare accounts and clients: tutorial/prepare.md
+  - Run against the mock: tutorial/mock.md
+  - Run against LS Login: tutorial/ls-login.md
+  - Refused cases: tutorial/refused.md
+- Reference:
+  - Testbed commands: reference/commands.md
+  - Settings: reference/settings.md
+  - What the mock can't show: reference/mock.md
+- Open questions: open-questions.md
+- Session with the LS Login team: session.md
+- Optional, remote machines: remote.md
+- Development: development.md
