@@ -88,6 +88,12 @@ nav:
   - T3 Groups and entitlements: tests/t3-groups.md
   - T4 Token lifetime and refresh: tests/t4-lifetime.md
   - T5 Attribution across hops: tests/t5-attribution.md
+- Outcomes:
+  - Open questions: outcomes/open-questions.md
+  - Results: outcomes/results.md
+  - Gap analysis: outcomes/gap-analysis.md
+  - Proposals: outcomes/proposals.md
+  - ELIXIR On-Cloud adoption plan: outcomes/adoption.md
 - About:
   - Contact: about/contact.md
   - Contributors: about/contributors.md

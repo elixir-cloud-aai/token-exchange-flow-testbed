@@ -1,6 +1,6 @@
 # Testbed limits
 
-What this testbed can and can't show, compared to the [Design](../background/design.md). These are limits of the testbed and of what can be observed with it. They aren't findings: findings go in the Gap analysis, after the tests have run.
+What this testbed can and can't show, compared to the [Design](../background/design.md). These are limits of the testbed and of what can be observed with it. They aren't findings: findings go in the [Gap analysis](../outcomes/gap-analysis.md), after the tests have run.
 
 ## Each design point
 

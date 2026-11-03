@@ -28,7 +28,7 @@ Docs are written for Read the Docs (MkDocs Material), and readable here as Markd
 - [Testbed](docs/testbed/index.md): scope, assumptions and limits
 - [Setup](docs/setup/requirements.md)
 - [Tests](docs/tests/index.md), with the questions for the LS Login team
-- Outcomes: empty until the tests have run
+- [Outcomes](docs/outcomes/open-questions.md): empty until the tests have run
 - [About](docs/about/contact.md)
 
 Licence: [Apache-2.0](LICENSE). Never for production.
