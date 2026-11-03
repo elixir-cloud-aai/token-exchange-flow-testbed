@@ -1,0 +1,67 @@
+# The testbed against LS Login. Client IDs and secrets come from `lslogin.env`
+# (git-ignored, see `lslogin.env.example`) at runtime only. `services` and
+# `session` share the network namespace of `network`, so that `services` can be
+# restarted with new settings while a session keeps its tokens in memory. The
+# only published port is the login callback, on the host's loopback interface.
+#
+#   docker compose -f compose.lslogin.yaml up -d --wait services
+#   docker compose -f compose.lslogin.yaml run --rm session --record /results/session.jsonl
+#   docker compose -f compose.lslogin.yaml down -v
+name: token-exchange-testbed-lslogin
+
+x-testbed: &testbed
+  image: token-exchange-testbed:local
+  build: .
+  init: true
+  env_file:
+    - lslogin.env
+  environment:
+    # Published ports arrive on the container's network interface
+    TESTBED_CALLBACK_BIND: 0.0.0.0
+    # Docker can add proxy settings; the services are never behind a proxy
+    NO_PROXY: localhost,127.0.0.1
+    no_proxy: localhost,127.0.0.1
+
+services:
+  # Does nothing but hold the network namespace
+  network:
+    image: token-exchange-testbed:local
+    build: .
+    init: true
+    entrypoint: [python, -c, "import time; time.sleep(2**31)"]
+    ports:
+      - "127.0.0.1:18994:18994"
+
+  services:
+    <<: *testbed
+    network_mode: service:network
+    entrypoint: [testbed-services]
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          import urllib.request as u;
+          o = u.build_opener(u.ProxyHandler({}));
+          [o.open(f"http://localhost:{p}/healthz", timeout=2) for p in (18991, 18992, 18993)]
+      interval: 2s
+      timeout: 10s
+      retries: 30
+
+  session:
+    <<: *testbed
+    profiles: [tools]
+    entrypoint: [testbed-session]
+    network_mode: service:services
+    depends_on:
+      services:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    # Results of `--record /results/<file>` hold decoded claims of the accounts
+    # used, so test accounts only. On Linux, this user must be able to write
+    # to `./results`
+    user: "${TESTBED_UID:-1000}:${TESTBED_GID:-1000}"
+    volumes:
+      - ./results:/results

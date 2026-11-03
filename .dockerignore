@@ -1,0 +1,16 @@
+# Deny by default: only what the image needs goes into the build context
+*
+!src
+!docs
+!pyproject.toml
+!uv.lock
+!README.md
+!LICENSE
+
+# Never, even if the lines above would match: secrets and results of runs
+**/.env
+**/.env.*
+**/*.env
+**/*.env.*
+**/results
+**/__pycache__

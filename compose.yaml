@@ -1,0 +1,73 @@
+# The testbed against the mock identity provider, on one machine only. All
+# containers share the network namespace of `mock`, so that the mock, the
+# services and the session reach each other on `localhost`, under the same
+# issuer URL as outside of containers. No port is published.
+#
+#   docker compose build
+#   docker compose run --rm e2e
+#   docker compose down -v
+#
+# The mock's signing keys are public defaults: never publish this beyond the
+# local machine (`compose.dev.yaml` publishes it on the loopback interface).
+name: token-exchange-testbed
+
+x-testbed: &testbed
+  image: token-exchange-testbed:local
+  build: .
+  init: true
+  network_mode: service:mock
+  environment:
+    TESTBED_PROVIDER: mock
+  depends_on:
+    mock:
+      condition: service_healthy
+
+services:
+  mock:
+    image: ghcr.io/navikt/mock-oauth2-server:6.0.7@sha256:f67032396f2ee4320d09389a174ef04112c754e49ce26f060050a66c1c07aedb
+    environment:
+      JSON_CONFIG_PATH: /config/oidc.json
+      SERVER_PORT: "18990"
+    volumes:
+      - ./mock/oidc.json:/config/oidc.json:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:18990/testbed/.well-known/openid-configuration"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+
+  services:
+    <<: *testbed
+    entrypoint: [testbed-services]
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          import urllib.request as u;
+          o = u.build_opener(u.ProxyHandler({}));
+          [o.open(f"http://localhost:{p}/healthz", timeout=2) for p in (18991, 18992, 18993)]
+      interval: 2s
+      timeout: 10s
+      retries: 30
+
+  session:
+    <<: *testbed
+    profiles: [tools]
+    entrypoint: [testbed-session]
+    depends_on:
+      services:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    # Results of `--record /results/<file>`: test data only. On Linux, this
+    # user must be able to write to `./results`
+    user: "${TESTBED_UID:-1000}:${TESTBED_GID:-1000}"
+    volumes:
+      - ./results:/results
+
+  e2e:
+    <<: *testbed
+    profiles: [tools]
+    entrypoint: [testbed-e2e]
