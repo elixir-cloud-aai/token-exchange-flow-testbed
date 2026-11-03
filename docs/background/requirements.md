@@ -1,6 +1,6 @@
 # Requirements
 
-What the [use case](use-case.md) needs, in three groups, without saying how to achieve it. The [design](design.md) says how, and Coverage maps each requirement to the design and to the tests.
+What the [use case](use-case.md) needs, in three groups, without saying how to achieve it. The [design](design.md) says how, and [Coverage](../testbed/coverage.md) maps each requirement to the design and to the tests.
 
 ## User requirements
 

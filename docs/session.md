@@ -3,7 +3,7 @@
 The sequence for the planned hands-on session with the LS Login team, on one page, with blanks for the results. The [tutorial](tutorial/index.md) explains the same steps at more length. Afterwards, update the "To check" list of [proTES #391](https://github.com/elixir-cloud-aai/proTES/issues/391) and the [open questions](open-questions.md) with the answers.
 
 !!! warning "Status"
-    Nothing here has run against LS Login. Every "Expected" is what the LS Login team's answers of 2026-11-03 or the standards suggest, not an observation. All commands have run against a local mock, which only shows that they work: see [What the mock can't show](reference/mock.md).
+    Nothing here has run against LS Login. Every "Expected" is what the LS Login team's answers of 2026-11-03 or the standards suggest, not an observation. All commands have run against a local mock, which only shows that they work: see What the mock can't show.
 
 Target flow, as in proTES #391: each caller exchanges its token for one meant for the next service.
 

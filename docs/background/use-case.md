@@ -41,4 +41,4 @@ Each scenario has a number, which the [requirements](requirements.md) refer to.
 
 ## Why this deserves a blueprint
 
-Each of these services has its own API standard, and those standards leave open how a researcher's identity travels from one service to the next. Without a shared answer, each deployment makes one up: services then store credentials they shouldn't hold, or a node has to trust whatever the service before it claims. The [design](design.md) describes a shared answer for the end state, and the testbed shows how much of it works today.
+Each of these services has its own API standard, and those standards leave open how a researcher's identity travels from one service to the next. Without a shared answer, each deployment makes one up: services then store credentials they shouldn't hold, or a node has to trust whatever the service before it claims. The [design](design.md) describes a shared answer for the end state, and the [testbed](../testbed/index.md) shows how much of it works today.

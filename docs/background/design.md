@@ -1,6 +1,6 @@
 # Design
 
-The end state: all software follows the standards, and nothing is held back by what any product supports today. This page describes that, and nothing else. What we can show of it today, and why, is under Testbed limits.
+The end state: all software follows the standards, and nothing is held back by what any product supports today. This page describes that, and nothing else. What we can show of it today, and why, is under [Testbed limits](../testbed/limits.md).
 
 ## Overview
 

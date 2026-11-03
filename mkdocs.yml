@@ -66,10 +66,13 @@ nav:
   - Use case: background/use-case.md
   - Requirements: background/requirements.md
   - Design: background/design.md
-- Concepts:
-  - The flow: concepts/flow.md
-  - What LS Login requires: concepts/ls-login.md
-  - What can't work yet: concepts/limits.md
+- Testbed:
+  - testbed/index.md
+  - Assumptions and constraints: testbed/assumptions.md
+  - Actors and components: testbed/components.md
+  - Testbed design: testbed/design.md
+  - Testbed limits: testbed/limits.md
+  - Coverage: testbed/coverage.md
 - Tutorial:
   - tutorial/index.md
   - Prepare accounts and clients: tutorial/prepare.md
@@ -79,7 +82,6 @@ nav:
 - Reference:
   - Testbed commands: reference/commands.md
   - Settings: reference/settings.md
-  - What the mock can't show: reference/mock.md
 - Open questions: open-questions.md
 - Session with the LS Login team: session.md
 - Optional, remote machines: remote.md

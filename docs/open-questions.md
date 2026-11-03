@@ -44,7 +44,7 @@ Or how else does the next hop's ID get into `aud`? (Steps 3, 4)
 
 ### Which group release does a node see, and per which client? {#release}
 
-Entitlements are computed for the client calling the exchange. (Steps 14, 15) Group release as such is [confirmed](concepts/ls-login.md#what-the-ls-login-team-told-us): the group is assigned to a resource on the service's facility.
+Entitlements are computed for the client calling the exchange. (Steps 14, 15) Group release as such is confirmed: the group is assigned to a resource on the service's facility.
 
 - **The exchanging client's, as #391 assumes:** each gateway's facility needs the group of everything downstream. That goes into #391's registration notes and the operator docs.
 - **If `introspect --as node` gives the node's own view, and we want that:** FOCA needs introspection, as it only has user info today.
@@ -126,14 +126,14 @@ The `aud` rule, `act`, lifetimes and refresh token lifetimes were named as possi
 
 ### Is `/cas/oidc` the new proxy stack?
 
-A [page on re-registration](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/2184773648/Service+Provider+Re-registration+for+use+LS+AAI+Eosc+compatible+AAI) names that issuer for the LS AAI EOSC node. The discovery documents differ, as shown in [What LS Login requires](concepts/ls-login.md#what-weve-seen).
+A [page on re-registration](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/2184773648/Service+Provider+Re-registration+for+use+LS+AAI+Eosc+compatible+AAI) names that issuer for the LS AAI EOSC node. The discovery documents differ, as shown in What LS Login requires.
 
 - **If it is:** do the rules on this site apply to it already? The testbed can be pointed to it with `TESTBED_ISSUER`.
 - **Which issuer should new test clients use?** Tokens of one aren't accepted by services that trust the other, so all services of a chain have to move together.
 
 ### Is `act` coming?
 
-The ask: nested `act` ([RFC 8693, section 4.1](https://datatracker.ietf.org/doc/html/rfc8693#section-4.1)), set by LS Login from the exchanging client. See [What can't work yet](concepts/limits.md).
+The ask: nested `act` ([RFC 8693, section 4.1](https://datatracker.ietf.org/doc/html/rfc8693#section-4.1)), set by LS Login from the exchanging client. See What can't work yet.
 
 - **Yes:** the chain comes from nested `act` claims, and a gateway finding itself in the chain refuses the request.
 - **No:** provenance and accounting stay in logs, with `traceparent`.
