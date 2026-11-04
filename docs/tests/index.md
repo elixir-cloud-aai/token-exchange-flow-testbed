@@ -54,6 +54,30 @@ Then delete `lslogin.env`, and `results/` once you've taken what you need: it ho
 
 To run the same against the mock, leave out `-f compose.lslogin.yaml`. Everything works, but see the table above for what it means.
 
+## A second client, if a result is in doubt
+
+Optional, and only if an exchange or a refusal looks odd and you want to rule out the testbed's own code. The LS Login team suggested [OAuth Tools](https://oauth.tools/) by Curity for trying exchanges: a web client whose Token Exchange Flow sends one exchange request and shows the answer. It's a comparison, not proof, as it has to use a client of its own. The same answer points away from the testbed's code, but rules can differ per client. A different answer may come from the client's registration.
+
+It doesn't replace any test. It has no documented API or command line, so it can't be scripted or be part of the automated run. It sends one `audience` and one `resource` per request, and it knows nothing of our services, the hops behind them or the record. It shouldn't reach the mock either, as `localhost` would mean Curity's server, not your machine (we didn't try).
+
+!!! danger "Everything you send passes through Curity's server"
+    The web version doesn't call the identity provider from your browser. It sends each request to its own server, `oauth.tools/api/client/proxy`, which passes it on. That includes **the client secret, the authorization code, the subject token and the tokens that come back**. Curity says that [no data is stored on the server](https://curity.io/oauth-tools). We can't check that, so treat anything you enter as disclosed.
+
+    - **Never enter the secret of one of the five testbed clients**, or of any client that you can't delete afterwards.
+    - **Never use a real person's account**, or enter or paste their tokens. Use test accounts only.
+    - **Don't use "Share link".** It stores an encrypted copy of the configuration on Curity's server.
+
+    We saw this on 2026-11-04, in the page's code and by capturing its requests with made-up values before they left the browser. The site can change, so check again before you enter anything.
+
+What to do, **never tried against LS Login**. We've only seen that its server fetches LS Login's public discovery document:
+
+1. Ask the LS Login team whether they're fine with a test client's secret and a test account's tokens passing through a third party.
+2. Register a sixth client just for this, in the [same way as `tx-test-client`](../setup/client-registration.md#five-clients), as confidential, with the redirect URI `https://oauth.tools/callback/code`. Give it the same resource indicators and [group release](../setup/client-registration.md#group-release), or its claims will differ for that reason alone.
+3. In OAuth Tools, create a workspace from the issuer `https://login.aai.lifescience-ri.eu/oidc/`.
+4. Log in with account A in a Code Flow. The session never shows its tokens, so the subject token has to come from this login.
+5. In a Token Exchange Flow, send the request that was in doubt, with the same parameters as in the session. Compare the status, the error and the claims with what the session showed.
+6. Afterwards, delete the client and the workspace. Tokens that were already issued stay valid until they expire.
+
 ## Questions the tests answer
 
 Each one is explained on its test's page, with what its outcome changes.
