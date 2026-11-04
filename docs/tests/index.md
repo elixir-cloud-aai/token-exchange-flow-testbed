@@ -56,7 +56,7 @@ To run the same against the mock, leave out `-f compose.lslogin.yaml`. Everythin
 
 ## A second client, if a result is in doubt
 
-Optional, and only if an exchange or a refusal looks odd and you want to rule out the testbed's own code. The LS Login team suggested [OAuth Tools](https://oauth.tools/) by Curity for trying exchanges: a web client whose Token Exchange Flow sends one exchange request and shows the answer. If it gets the same answer, the testbed's client isn't the cause.
+Optional, and only if an exchange or a refusal looks odd and you want to rule out the testbed's own code. The LS Login team suggested [OAuth Tools](https://oauth.tools/) by Curity for trying exchanges: a web client whose Token Exchange Flow sends one exchange request and shows the answer. It's a comparison, not proof, as it has to use a client of its own. The same answer points away from the testbed's code, but rules can differ per client. A different answer may come from the client's registration.
 
 It doesn't replace any test. It has no documented API or command line, so it can't be scripted or be part of the automated run. It sends one `audience` and one `resource` per request, and it knows nothing of our services, the hops behind them or the record. It shouldn't reach the mock either, as `localhost` would mean Curity's server, not your machine (we didn't try).
 
@@ -72,7 +72,7 @@ It doesn't replace any test. It has no documented API or command line, so it can
 What to do, **never tried against LS Login**. We've only seen that its server fetches LS Login's public discovery document:
 
 1. Ask the LS Login team whether they're fine with a test client's secret and a test account's tokens passing through a third party.
-2. Register a sixth client just for this, in the [same way as `tx-test-client`](../setup/client-registration.md#five-clients), as confidential, with the redirect URI `https://oauth.tools/callback/code`.
+2. Register a sixth client just for this, in the [same way as `tx-test-client`](../setup/client-registration.md#five-clients), as confidential, with the redirect URI `https://oauth.tools/callback/code`. Give it the same resource indicators and [group release](../setup/client-registration.md#group-release), or its claims will differ for that reason alone.
 3. In OAuth Tools, create a workspace from the issuer `https://login.aai.lifescience-ri.eu/oidc/`.
 4. Log in with account A in a Code Flow. The session never shows its tokens, so the subject token has to come from this login.
 5. In a Token Exchange Flow, send the request that was in doubt, with the same parameters as in the session. Compare the status, the error and the claims with what the session showed.
