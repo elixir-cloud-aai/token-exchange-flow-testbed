@@ -43,6 +43,7 @@
 
 - [`mock-oauth2-server`](https://github.com/navikt/mock-oauth2-server): the mock.
 - [uv](https://docs.astral.sh/uv/): the optional development path.
+- [OAuth Tools](https://oauth.tools/): Curity's web client for OAuth flows, for an optional [cross-check by hand](../tests/index.md#a-second-client-if-a-result-is-in-doubt). All requests pass through Curity's server, so see the warning there. With made-up values, its Token Exchange Flow is also a good first look at the request: the form shows it as a `curl` command, and nothing is sent until you press the button.
 
 ## LS Login and Perun docs
 
