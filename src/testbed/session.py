@@ -7,6 +7,7 @@ shown or recorded is decoded claims, never a token or secret.
 import argparse
 import json
 import os
+import readline
 import shlex
 import sys
 import time
@@ -39,7 +40,7 @@ from testbed.tokens import (
 )
 from testbed.validation import TIMEOUT, HttpClient, InvalidToken
 
-DEFAULT_SCOPE = "openid eduperson_entitlement offline_access"
+DEFAULT_SCOPE = "openid entitlements offline_access"
 # Claims that differ between any two tokens, whatever path they took
 VOLATILE_CLAIMS = {"jti", "iat", "nbf", "exp", "nonce"}
 # Fixtures of the mock: made-up test users, no real data
@@ -885,4 +886,5 @@ def main() -> None:
         sys.exit(str(exc))
     if args.record:
         _check_record(args.record)
+    readline.set_auto_history(True)
     Session(settings, create_http(settings), record=args.record).run_interactive()

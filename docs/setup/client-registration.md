@@ -18,10 +18,10 @@ Register them at the [service registration app](https://services.aai.lifescience
 
 | Name | Stands for | Type | Flows | Scopes |
 |---|---|---|---|---|
-| `tx-test-node` | TES node | confidential | client credentials (only so that it has a secret for introspection) | `openid`, `eduperson_entitlement` |
-| `tx-test-gateway` | proTES | confidential | token exchange, client credentials | `openid`, `eduperson_entitlement`, `offline_access` |
-| `tx-test-orchestrator` | Conquest | confidential | token exchange, refresh token, client credentials | `openid`, `eduperson_entitlement`, `offline_access` |
-| `tx-test-client` | Krini with a backend | confidential | authorization code with PKCE, refresh token, token exchange, device code | `openid`, `eduperson_entitlement`, `offline_access` |
+| `tx-test-node` | TES node | confidential | client credentials (only so that it has a secret for introspection) | `openid`, `entitlements` |
+| `tx-test-gateway` | proTES | confidential | token exchange, client credentials | `openid`, `entitlements`, `offline_access` |
+| `tx-test-orchestrator` | Conquest | confidential | token exchange, refresh token, client credentials | `openid`, `entitlements`, `offline_access` |
+| `tx-test-client` | Krini with a backend | confidential | authorization code with PKCE, refresh token, token exchange, device code | `openid`, `entitlements`, `offline_access` |
 | `tx-test-public` | Krini without a backend | public, PKCE | as `tx-test-client` | as `tx-test-client` |
 
 Redirect URI of the last two: `http://localhost:18994/callback`. The others have none.
