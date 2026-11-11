@@ -13,6 +13,8 @@ uv run pre-commit install
 
 CI runs the same (`.github/workflows/ci.yml`), and needs no secrets.
 
+Unit tests use a temporary login callback port, so an LS Login session on port 18994 can stay running.
+
 ```sh
 uv run pytest
 uv run ruff check .

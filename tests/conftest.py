@@ -1,14 +1,16 @@
 """Fixtures: a fake provider that signs real JWTs, without any network."""
 
 import json
+import socket
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from typing import Any
 
 import jwt
 import pytest
 from cryptography.hazmat.primitives.asymmetric import rsa
 
+from testbed import login
 from testbed.redact import unverified_claims
 from testbed.settings import LS_LOGIN_ISSUER, MOCK_ISSUER, Settings, load_settings
 
@@ -26,6 +28,22 @@ LS_ENV = {
     "TESTBED_REQUIRED_ENTITLEMENT": "urn:example:compute",
 }
 ENTITLEMENT = "urn:example:compute"
+
+
+@pytest.fixture(scope="module")
+def callback_port() -> Iterator[int]:
+    """Use a temporary login callback port, leaving running sessions alone.
+
+    Yields:
+        Temporary callback port for the test module.
+    """
+    with socket.socket() as listener:
+        listener.bind(("localhost", 0))
+        port = listener.getsockname()[1]
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(login, "CALLBACK_PORT", port)
+        patch.setattr(login, "REDIRECT_URI", f"http://localhost:{port}/callback")
+        yield port
 
 
 class FakeResponse:
@@ -191,7 +209,7 @@ class FakeProvider:
             return FakeResponse(
                 body={
                     "sub": subject,
-                    "eduperson_entitlement": self.entitlements.get(subject, []),
+                    "entitlements": self.entitlements.get(subject, []),
                 }
             )
         return FakeResponse(404)

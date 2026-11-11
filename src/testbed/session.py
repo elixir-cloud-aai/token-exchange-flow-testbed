@@ -47,7 +47,7 @@ VOLATILE_CLAIMS = {"jti", "iat", "nbf", "exp", "nonce"}
 MOCK_USERS: dict[str, dict[str, Any]] = {
     "inside": {
         "username": "test-user-inside",
-        "claims": {"eduperson_entitlement": [MOCK_ENTITLEMENT]},
+        "claims": {"entitlements": [MOCK_ENTITLEMENT]},
     },
     "outside": {"username": "test-user-outside", "claims": {}},
 }

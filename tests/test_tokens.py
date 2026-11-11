@@ -172,7 +172,7 @@ def test_userinfo(ls_settings: Settings, provider: FakeProvider) -> None:
     """User info is requested with the token, and refusals are reported."""
     tokens = TokenClient(ls_settings, provider)
     provider.entitlements["user-1"] = ["urn:a"]
-    assert tokens.userinfo(provider.mint())["eduperson_entitlement"] == ["urn:a"]
+    assert tokens.userinfo(provider.mint())["entitlements"] == ["urn:a"]
     base = provider.issuer.rstrip("/")
     provider.routes[f"{base}/userinfo"] = lambda _url, _kw: FakeResponse(401)
     with pytest.raises(Refused):

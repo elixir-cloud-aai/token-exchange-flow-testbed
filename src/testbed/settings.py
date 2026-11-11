@@ -60,7 +60,6 @@ class Settings:
         algorithms: Accepted signature algorithms.
         token_types: Accepted values of the `typ` header.
         required_entitlement: Entitlement that the node requires, if any.
-        entitlement_claims: User info claims that hold entitlements.
         target_param: Which parameters services name their next hop with in
             exchanges: `audience`, `resource`, `resource-url` or `both`.
         exchange_scope: `scope` that services request in exchanges, if any.
@@ -76,7 +75,6 @@ class Settings:
     algorithms: tuple[str, ...] = ("RS256",)
     token_types: tuple[str, ...] = ("at+jwt", "application/at+jwt")
     required_entitlement: str | None = None
-    entitlement_claims: tuple[str, ...] = ("eduperson_entitlement", "entitlements")
     target_param: str = "audience"
     exchange_scope: str | None = None
     callback_bind: str = "localhost"

@@ -11,7 +11,7 @@ from typing import Any
 import pytest
 import requests
 
-from testbed.login import REDIRECT_URI
+from testbed import login
 from testbed.session import (
     Session,
     UsageError,
@@ -30,6 +30,8 @@ from testbed.settings import (
 )
 from testbed.tokens import TYPE_REFRESH, TokenResponse
 from tests.conftest import FakeProvider, FakeResponse
+
+pytestmark = pytest.mark.usefixtures("callback_port")
 
 
 @pytest.fixture
@@ -280,7 +282,7 @@ def test_other_commands(session: Session, provider: FakeProvider) -> None:
     }
     assert results["clients"]["ls_login_rules_emulated"] is False
     assert results["clients"]["clients"]["public"]["has_secret"] is False
-    assert results["userinfo user"]["eduperson_entitlement"] == ["urn:a"]
+    assert results["userinfo user"]["entitlements"] == ["urn:a"]
     assert results["lifetimes"]["tokens"]["user"]["exp_minus_iat"] == 3600
     assert results["introspect user --as node"]["active"] is True
     assert results["revoke user --as client --refresh"]["ok"] is True
@@ -446,7 +448,7 @@ def _login_form(url: str, options: dict[str, Any]) -> FakeResponse:
     FORMS.append(options["data"])
     query = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
     state = query["state"][0]
-    location = f"{REDIRECT_URI}?code=the-code&state={state}"
+    location = f"{login.REDIRECT_URI}?code=the-code&state={state}"
     return FakeResponse(302, {}, {"Location": location})
 
 
@@ -465,20 +467,18 @@ def test_login_at_the_mock_fills_in_its_form(
     """The mock's login form gets the made-up user, and no browser is needed."""
     FORMS.clear()
     mock_provider.routes[f"{MOCK_ISSUER}/authorize"] = _login_form
-    mock_provider.routes[REDIRECT_URI] = _follow_callback
+    mock_provider.routes[login.REDIRECT_URI] = _follow_callback
     session = Session(mock_settings, mock_provider, output=lambda _line: None)
     assert session.execute(f"login u --as client --mock-user {user}")["ok"]
     assert FORMS[0]["username"] == f"test-user-{user}"
-    assert (
-        json.loads(FORMS[0]["claims"]).get("eduperson_entitlement", []) == entitlements
-    )
+    assert json.loads(FORMS[0]["claims"]).get("entitlements", []) == entitlements
 
 
 def test_login_at_another_issuer_of_the_mock(mock_settings: Settings) -> None:
     """`--mock-issuer` logs in at that issuer."""
     short = FakeProvider(MOCK_SHORT_ISSUER)
     short.routes[f"{MOCK_SHORT_ISSUER}/authorize"] = _login_form
-    short.routes[REDIRECT_URI] = _follow_callback
+    short.routes[login.REDIRECT_URI] = _follow_callback
     session = Session(mock_settings, short, output=lambda _line: None)
     assert session.execute("login s --as client --mock-issuer short")["ok"]
 
@@ -522,7 +522,7 @@ def test_login_at_a_real_provider_shows_the_url(
         shown.append(line)
         url = line.removeprefix("Log in at: ")
         state = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)["state"][0]
-        _follow_callback(f"{REDIRECT_URI}?code=the-code&state={state}", {})
+        _follow_callback(f"{login.REDIRECT_URI}?code=the-code&state={state}", {})
 
     monkeypatch.setattr("testbed.session.webbrowser.open", open_browser)
     session = Session(ls_settings, provider, output=output)
