@@ -94,7 +94,7 @@ Each one is explained on its test's page, with what its outcome changes.
 | Does LS Login check the subject token's signature and expiry? | [T2](t2-refused.md#questions-it-answers) |
 | Which group release does a node see, and per which client? | [T3](t3-groups.md#questions-it-answers) |
 | How can a group be released without locking out users outside it? | [T3](t3-groups.md#questions-it-answers) |
-| Which role is needed to assign groups to a resource? | [T3](t3-groups.md#questions-it-answers) |
+| Which role is needed to assign groups to a resource? | Answered: [T3](t3-groups.md#which-role-is-needed-to-assign-groups-to-a-resource) |
 | Group entitlements or resource capabilities? | [T3](t3-groups.md#questions-it-answers) |
 | What is the exact entitlement value? | [T3](t3-groups.md#questions-it-answers) |
 | What does "1 hour" cover, and is it capped by the subject token? | [T4](t4-lifetime.md#questions-it-answers) |

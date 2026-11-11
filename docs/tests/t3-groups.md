@@ -78,7 +78,7 @@ From the LS Login team, 2026-11-03: create a second resource for the Lifescience
 
 ### Which role is needed to assign groups to a resource?
 
-This project's maintainer could open a facility and create a resource, but in "Assign groups" the Next button stays greyed out and no groups can be added, possibly because of a missing permission (seen by 2026-11-03).
+**Answered.** This project's maintainer could open a facility and create a resource, but in "Assign groups" the Next button stays greyed out and no groups can be added (seen by 2026-11-03).
 
 The LS AAI team confirmed that **TrustedFacilityAdmin within the relevant VO** enables this assignment. The VO admins have chosen not to grant that role for this setup; maintainers create resources and ask the VO admins to assign groups, as described in [Client registration](../setup/client-registration.md#who-can-assign-groups).
 
@@ -103,4 +103,4 @@ We derived the example from a known entitlement of the same form ([A12](../testb
 | Exact value | The entitlement in user info, compared with `TESTBED_REQUIRED_ENTITLEMENT` | |
 | Account A | Status, `policy` at the node | |
 | Account B | Login, exchange, status and `refused` at the node | |
-| Group release | Which role it took, and who granted it | |
+| Group release | Which role it took, and who granted it | TrustedFacilityAdmin within the relevant VO; not granted for this setup, so the VO admins assign groups on request ([Client registration](../setup/client-registration.md#who-can-assign-groups)) |

@@ -24,7 +24,7 @@
 
 ## Groups
 
-**"Assign groups" has its Next button greyed out.** This is a known problem: see [Client registration](client-registration.md#group-release).
+**"Assign groups" has its Next button greyed out.** Assigning a VO's groups takes TrustedFacilityAdmin within that VO, which the VO admins don't grant for this setup. Create the resource and ask the VO admins to assign the groups: see [Client registration](client-registration.md#who-can-assign-groups).
 
 ## Calling services
 
