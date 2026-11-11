@@ -17,6 +17,7 @@ coverage.xml
 .pytest_cache/
 .ruff_cache/
 dist/
+.idea/
 
 # Docs build
 site/

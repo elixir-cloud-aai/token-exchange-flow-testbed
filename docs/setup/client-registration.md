@@ -40,6 +40,18 @@ Both forms of each indicator are deliberate. The subject token's `aud` must hold
 
 **Record:** what the app accepted, and anything that needed approval.
 
+### Registered services
+
+Fill in each service's registration link from the LS AAI service registration app.
+
+| Role | Service name | Registration link                                                                       |
+|---|---|-----------------------------------------------------------------------------------------|
+| Node | `ELIXIR On-Cloud token exchange testbed node` | [Client 4303](https://services.aai.lifescience-ri.eu/spreg/auth/facilities/detail/4303) |
+| Gateway | `ELIXIR On-Cloud token exchange testbed gateway` | [Client 4304](https://services.aai.lifescience-ri.eu/spreg/auth/facilities/detail/4304) |
+| Orchestrator | `ELIXIR On-Cloud token exchange testbed orchestrator` | [Client 4308](https://services.aai.lifescience-ri.eu/spreg/auth/facilities/detail/4308) |
+| Client | `ELIXIR On-Cloud token exchange testbed client` | [Client 4309](https://services.aai.lifescience-ri.eu/spreg/auth/facilities/detail/4309) |
+| Public client (optional) | `ELIXIR On-Cloud token exchange testbed client` | [Client 4309](https://services.aai.lifescience-ri.eu/spreg/auth/facilities/detail/4309) |
+
 ## Group release
 
 From the LS Login team, 2026-11-03 ([A9, A10](../testbed/assumptions.md#assumptions)): a **facility** is a client's representation in Perun IDM, and a **resource** represents the relationship between that facility and a VO.
