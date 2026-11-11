@@ -44,7 +44,7 @@ Our own assumptions, from no statement at all:
 
 ## What we've been unable to do
 
-"Assign groups" in Perun: this project's maintainer could open a facility and create a resource, but the Next button stays greyed out and no groups can be added, possibly because of a missing permission (seen by 2026-11-03). See [T3](../tests/t3-groups.md#which-role-is-needed-to-assign-groups-to-a-resource).
+"Assign groups" in Perun: this project's maintainer could open a facility and create a resource, but the Next button stays greyed out and no groups can be added (seen by 2026-11-03). This is now answered: it takes TrustedFacilityAdmin within the relevant VO, which the VO admins don't grant for this setup; they assign groups on request. See [Client registration](../setup/client-registration.md#who-can-assign-groups) and [T3](../tests/t3-groups.md#which-role-is-needed-to-assign-groups-to-a-resource).
 
 ## What public documents say
 
