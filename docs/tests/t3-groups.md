@@ -80,9 +80,9 @@ From the LS Login team, 2026-11-03: create a second resource for the Lifescience
 
 This project's maintainer could open a facility and create a resource, but in "Assign groups" the Next button stays greyed out and no groups can be added, possibly because of a missing permission (seen by 2026-11-03).
 
-The operator's roles page lists assigning groups under Trusted facility admin, Resource admin and Resource self service, and not under Facility admin (see [What public documents say](../testbed/assumptions.md#what-public-documents-say)). It doesn't say which one applies here, or who grants it for a VO's group.
+The LS AAI team confirmed that **TrustedFacilityAdmin within the relevant VO** enables this assignment. The VO admins have chosen not to grant that role for this setup; maintainers create resources and ask the VO admins to assign groups, as described in [Client registration](../setup/client-registration.md#who-can-assign-groups).
 
-**What it changes:** which role a service's operators need to ask for, and from whom. Without it, nobody can set up group release for a new service by themselves, so this goes into the operator docs of every service in the chain.
+**What it changes:** operators should plan for VO-admin involvement when setting up group release, rather than trying to obtain self-service assignment permissions.
 
 ### Group entitlements or resource capabilities?
 
