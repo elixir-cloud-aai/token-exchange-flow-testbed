@@ -126,16 +126,13 @@ class Service:
             return {"values": [], "error": "user info request failed"}
         if userinfo.get("sub") != claims.get("sub"):
             return {"values": [], "error": "user info is about another subject"}
-        values: list[str] = []
-        for claim in self.settings.entitlement_claims:
-            found = userinfo.get(claim, [])
-            found = [found] if isinstance(found, str) else found
-            if not isinstance(found, list) or not all(
-                isinstance(item, str) for item in found
-            ):
-                return {"values": [], "error": f"{claim} is not a list of strings"}
-            values.extend(found)
-        return {"values": values}
+        found = userinfo.get("entitlements", [])
+        found = [found] if isinstance(found, str) else found
+        if not isinstance(found, list) or not all(
+            isinstance(item, str) for item in found
+        ):
+            return {"values": [], "error": "entitlements is not a list of strings"}
+        return {"values": found}
 
     def check(self, headers: Any) -> RequestContext:
         """Check an incoming request.

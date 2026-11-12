@@ -10,10 +10,12 @@ import pytest
 import requests
 
 from testbed import login
-from testbed.login import REDIRECT_URI, code_flow, device_flow, pkce_pair
-from testbed.settings import CALLBACK_PORT, Settings
+from testbed.login import code_flow, device_flow, pkce_pair
+from testbed.settings import Settings
 from testbed.tokens import Refused, TokenClient
 from tests.conftest import FakeProvider, FakeResponse
+
+pytestmark = pytest.mark.usefixtures("callback_port")
 
 
 def _no_proxy_get(url: str) -> None:
@@ -46,7 +48,7 @@ def _browser_returning(**params: str) -> Any:
         """
         query = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
         values = {"state": query["state"][0], **params}
-        _no_proxy_get(f"{REDIRECT_URI}?{urllib.parse.urlencode(values)}")
+        _no_proxy_get(f"{login.REDIRECT_URI}?{urllib.parse.urlencode(values)}")
 
     return browse
 
@@ -257,7 +259,10 @@ def test_code_flow_without_resources(
 
 
 def test_callback_listens_on_the_configured_address(
-    ls_settings: Settings, provider: FakeProvider, monkeypatch: pytest.MonkeyPatch
+    ls_settings: Settings,
+    provider: FakeProvider,
+    monkeypatch: pytest.MonkeyPatch,
+    callback_port: int,
 ) -> None:
     """The address of the callback comes from the settings; the URI stays."""
     addresses: list[tuple[str, int]] = []
@@ -285,5 +290,5 @@ def test_callback_listens_on_the_configured_address(
         [],
         _browser_returning(code="the-code"),
     )
-    assert addresses == [("192.0.2.1", CALLBACK_PORT)]
+    assert addresses == [("192.0.2.1", callback_port)]
     assert "localhost" in provider.posts[-1][1]["redirect_uri"]

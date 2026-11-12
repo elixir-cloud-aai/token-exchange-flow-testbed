@@ -29,7 +29,7 @@ tb> exchange gw-o --as orchestrator --from to-orch --audience @gateway
 tb> userinfo gw-o
 tb> introspect to-node --as node
 tb> introspect to-node --as gateway
-tb> exchange to-node-s --as gateway --from to-gw --audience @node --scope "openid eduperson_entitlement"
+tb> exchange to-node-s --as gateway --from to-gw --audience @node --scope "openid entitlements"
 tb> userinfo to-node-s
 ```
 

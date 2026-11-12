@@ -50,7 +50,7 @@ Our own assumptions, from no statement at all:
 
 These pages describe Perun and its proxy. They cover several Perun instances, so they may not describe LS Login exactly.
 
-- [Entitlements](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/209813518/Entitlements): in OIDC, the values are in the `entitlements` or `eduperson_entitlement` claim of user info, and the scope `eduperson_entitlement` is required. A group entitlement is released for each group the user is in, if that group is assigned to a resource on the facility of the service.
+- [Entitlements](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/209813518/Entitlements): in OIDC, request the `entitlements` scope to receive the values in the `entitlements` claim at the UserInfo endpoint, as specified by [AARC-G069](https://aarc-community.org/guidelines/aarc-g069/). The testbed uses only this scope and claim name. A group entitlement is released for each group the user is in, if that group is assigned to a resource on the facility of the service.
 - [Group entitlement](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/350879786/Group+entitlement): the value depends on group names, in the form `<NAMESPACE>:group:<GROUP>[:<SUBGROUP>*][#<AUTHORITY>]`, so it changes if a group is renamed or moved.
 - [Resource capability](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/351272963/Resource+capability): the alternative that doesn't depend on group names. The Entitlements page recommends it for that reason.
 - [Facility](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/2252570626/Facility) and [Resource](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/2261055/Resource): the entities behind A9.
@@ -66,7 +66,6 @@ Public discovery documents, read on 2026-11-03, without credentials:
 |---|---|---|
 | Token exchange, refresh token, client credentials, device code | listed | listed |
 | Auth method `none` at the token endpoint | listed | not listed |
-| Scope `eduperson_entitlement` | listed | listed |
 | Scope `entitlements` | listed | not listed |
 
 The testbed uses `https://login.aai.lifescience-ri.eu/oidc/` by default. [A page on re-registration](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/2184773648/Service+Provider+Re-registration+for+use+LS+AAI+Eosc+compatible+AAI) names `https://login.aai.lifescience-ri.eu/cas/oidc` as the issuer for the LS AAI EOSC node, and says other production services still use the standard process. It doesn't say whether this is the new proxy stack, which is [a question for the event](../tests/index.md#questions-outside-the-tests). Being listed says nothing about what a given client may do.

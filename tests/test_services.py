@@ -167,7 +167,7 @@ def test_userinfo_of_another_subject_is_not_used(
     """User info must be about the token's subject, as in FOCA."""
     base = provider.issuer.rstrip("/")
     provider.routes[f"{base}/userinfo"] = lambda _url, _kw: FakeResponse(
-        200, {"sub": "other", "eduperson_entitlement": [ENTITLEMENT]}
+        200, {"sub": "other", "entitlements": [ENTITLEMENT]}
     )
     response = node.get("/report", headers=_bearer(provider.mint()))
     assert response.status_code == 502
@@ -409,7 +409,7 @@ def test_entitlements_of_the_wrong_type_are_an_error(
     """Odd values in user info are reported, and don't crash the node."""
     base = provider.issuer.rstrip("/")
     provider.routes[f"{base}/userinfo"] = lambda _url, _kw: FakeResponse(
-        200, {"sub": "user-1", "eduperson_entitlement": value}
+        200, {"sub": "user-1", "entitlements": value}
     )
     response = node.get("/report", headers=_bearer(provider.mint(sub="user-1")))
     assert response.status_code == 502

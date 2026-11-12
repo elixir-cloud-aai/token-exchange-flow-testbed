@@ -18,10 +18,10 @@ Register them at the [service registration app](https://services.aai.lifescience
 
 | Name | Stands for | Type | Flows | Scopes |
 |---|---|---|---|---|
-| `tx-test-node` | TES node | confidential | client credentials (only so that it has a secret for introspection) | `openid`, `eduperson_entitlement` |
-| `tx-test-gateway` | proTES | confidential | token exchange, client credentials | `openid`, `eduperson_entitlement`, `offline_access` |
-| `tx-test-orchestrator` | Conquest | confidential | token exchange, refresh token, client credentials | `openid`, `eduperson_entitlement`, `offline_access` |
-| `tx-test-client` | Krini with a backend | confidential | authorization code with PKCE, refresh token, token exchange, device code | `openid`, `eduperson_entitlement`, `offline_access` |
+| `tx-test-node` | TES node | confidential | client credentials (only so that it has a secret for introspection) | `openid`, `entitlements` |
+| `tx-test-gateway` | proTES | confidential | token exchange, client credentials | `openid`, `entitlements`, `offline_access` |
+| `tx-test-orchestrator` | Conquest | confidential | token exchange, refresh token, client credentials | `openid`, `entitlements`, `offline_access` |
+| `tx-test-client` | Krini with a backend | confidential | authorization code with PKCE, refresh token, token exchange, device code | `openid`, `entitlements`, `offline_access` |
 | `tx-test-public` | Krini without a backend | public, PKCE | as `tx-test-client` | as `tx-test-client` |
 
 Redirect URI of the last two: `http://localhost:18994/callback`. The others have none.
@@ -39,6 +39,18 @@ Resource indicators:
 Both forms of each indicator are deliberate. The subject token's `aud` must hold the exchanging client's *ID*, whereas RFC 8707 resources are absolute URIs. **If the app refuses a bare client ID as an indicator, that's the first thing to raise** ([C3](../testbed/assumptions.md#constraints)).
 
 **Record:** what the app accepted, and anything that needed approval.
+
+### Registered services
+
+Fill in each service's registration link from the LS AAI service registration app.
+
+| Role | Service name | Registration link                                                                       |
+|---|---|-----------------------------------------------------------------------------------------|
+| Node | `ELIXIR On-Cloud token exchange testbed node` | [Client 4303](https://services.aai.lifescience-ri.eu/spreg/auth/facilities/detail/4303) |
+| Gateway | `ELIXIR On-Cloud token exchange testbed gateway` | [Client 4304](https://services.aai.lifescience-ri.eu/spreg/auth/facilities/detail/4304) |
+| Orchestrator | `ELIXIR On-Cloud token exchange testbed orchestrator` | [Client 4308](https://services.aai.lifescience-ri.eu/spreg/auth/facilities/detail/4308) |
+| Client | `ELIXIR On-Cloud token exchange testbed client` | [Client 4309](https://services.aai.lifescience-ri.eu/spreg/auth/facilities/detail/4309) |
+| Public client (optional) | `ELIXIR On-Cloud token exchange testbed client` | [Client 4309](https://services.aai.lifescience-ri.eu/spreg/auth/facilities/detail/4309) |
 
 ## Group release
 
