@@ -41,7 +41,7 @@ Our own assumptions, from no statement at all:
 | C8 | Test accounts only, as sessions record their claims. | Our choice |
 | C9 | FOCA doesn't exchange tokens yet, so the testbed has its own small implementation. | FOCA 0.19.0 |
 | C10 | The new proxy stack may change the `aud` rule, `act` and lifetimes. Nothing specific to the current stack should be hard-coded in FOCA or proTES. | Follows from A3, A6, A7, C1 |
-| C11 | No sender-constrained tokens: the discovery document lists neither DPoP nor certificate-bound tokens. A refresh token is bound to a client only by that client's authentication, so only a confidential client's refresh token is bound to anything at all. | [What we've seen](#what-weve-seen), 2026-11-13 |
+| C11 | No sender-constrained tokens: the discovery document lists neither DPoP nor certificate-bound tokens. A refresh token belongs to the client ID it was issued to, and only that client's authentication proves who redeems it. A public client has no secret, so whoever holds its refresh token can redeem it as that client. | [What we've seen](#what-weve-seen), 2026-11-13 |
 | C12 | Nothing public says whether users can see or revoke a service's refresh tokens. The profile's "Revoke consent" withdraws a service's use of personal data; whether it also ends refresh tokens, we don't know. | [What public documents say](#what-public-documents-say) |
 
 ## What we've been unable to do

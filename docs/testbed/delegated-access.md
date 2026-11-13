@@ -37,12 +37,12 @@ Conquest runs a workflow for hours or days, long after the user's tokens have ex
 
 - **Lifetime:** 31 days "for now", the same for all, and configurable per service only in the new stack ([A6](assumptions.md#assumptions), [C5](assumptions.md#constraints)). A lifetime per run, from what the user agreed to, isn't offered. Whether the 31 days are idle or absolute, we don't know.
 - **Rotation and reuse detection:** unknown.
-- **Binding:** by client authentication only. The discovery document lists client secrets and `none`, and no DPoP or certificate-bound tokens ([C11](assumptions.md#constraints)). A refresh token of a public client is bound to nothing, so the workflow system must be a confidential client.
+- **Binding:** by client authentication only. The discovery document lists client secrets and `none`, and no DPoP or certificate-bound tokens ([C11](assumptions.md#constraints)). A public client's refresh token still belongs to its client ID, but without a secret, whoever holds it can redeem it as that client. So the workflow system must be a confidential client.
 
 **Testbed.**
 
 - `refresh` reports `refresh_token_rotated`: `true` if a new refresh token came back, `false` if the same one did, `null` if none did. Without a new one, the session keeps the old one, as RFC 6749 allows.
-- [T4](../tests/t4-lifetime.md#31-days-idle-or-absolute) compares `exp` of two refresh tokens, 10 minutes apart, to tell an idle limit from an absolute one, if the tokens are JWTs or introspection shows `exp`. The 31 days themselves can't be waited for.
+- [T4](../tests/t4-lifetime.md#31-days-idle-or-absolute) compares `exp` of two refresh tokens, 10 minutes apart, if the tokens are JWTs or introspection shows `exp`. A fixed `exp` shows an absolute limit. A moving one shows a sliding window for each token, but doesn't rule out a separate cap on the whole grant: only LS Login can confirm that. The 31 days themselves can't be waited for.
 - [T4](../tests/t4-lifetime.md#binding-and-reuse) tries to redeem the client's refresh token as another client, and to reuse a rotated one.
 - On the mock, none of this is evidence: any client can redeem any refresh token, and nothing rotates or ends ([What the mock can't show](limits.md#what-the-mock-cant-show)).
 

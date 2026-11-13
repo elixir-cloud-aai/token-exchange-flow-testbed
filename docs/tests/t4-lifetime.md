@@ -97,16 +97,16 @@ Ctrl-C ends a wait without losing the tokens.
 
 ### Binding and reuse
 
-In the same second session, as reuse detection may end every refresh token of a login, and later tests need those of the first. Another client tries the refresh token first, then the client refreshes twice, then reuses the older one:
+In the same second session, as reuse detection may end every refresh token of a login, and later tests need those of the first. The client refreshes twice and reuses the older refresh token. Then another client tries the newest one:
 
 ```text
-tb> refresh exp-other --as gateway --from exp-new
 tb> refresh exp-new2 --as client --from exp-new
 tb> refresh exp-reuse --as client --from exp-new
 tb> refresh exp-after --as client --from exp-new2
+tb> refresh exp-other --as orchestrator --from exp-after
 ```
 
-Only if `exp-new2` shows `refresh_token_rotated: true` does the reuse mean anything. Then a refused `exp-reuse` shows that rotation is enforced, and a refused `exp-after` that reuse ended the grant. If `exp-other` worked, the refresh token isn't bound to the client, which is a result of its own. If it was refused and `exp-new2` is refused, too, the attempt by another client ended the grant. See [Delegated access](../testbed/delegated-access.md#bounded-grant) for why this matters.
+Only if `exp-new2` shows `refresh_token_rotated: true` does the reuse mean anything. Then a refused `exp-reuse` shows that rotation is enforced, and a refused `exp-after` that reuse ended the grant. The other client is the orchestrator, as its registration has the refresh token flow, so a refusal is about the token, not about the flow. If it worked, the refresh token isn't bound to the client, which is a result of its own. If `exp-after` was refused, `exp-other` has no token to try: log in again with `login exp2 --as client`, then use `--from exp2`. See [Delegated access](../testbed/delegated-access.md#bounded-grant) for why this matters.
 
 ## Questions it answers
 
@@ -127,7 +127,7 @@ Lifetimes stay configurable in FOCA either way, as the new stack will change the
 ### Is the 31 days idle or absolute, and do refresh tokens rotate?
 
 - **Absolute:** it's the maximum length of a run, which goes into Conquest's docs.
-- **Idle:** runs are unlimited, as long as they refresh in time.
+- **Idle:** runs can go on as long as they refresh in time, unless the grant has a cap of its own, which only the LS Login team can confirm.
 - **Rotation:** FOCA's helper has to store the new token atomically, as a lost one ends the run.
 
 ### Are refresh tokens bound to the client, and is reuse detected?

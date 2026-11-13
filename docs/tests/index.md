@@ -128,7 +128,7 @@ For [delegated access](../testbed/delegated-access.md#user-control), a user shou
 
 - Does it also end the refresh tokens that the service holds? And the access tokens issued with them?
 - Does logging out at LS Login end refresh tokens?
-- **If neither:** only the service itself can end a run's access early, by revoking at `/oidc/revoke`, and Conquest's docs have to say so to users.
+- **If neither:** only the service itself can stop further refreshes, by revoking at `/oidc/revoke`, and Conquest's docs have to say so to users. Either way, access tokens already issued stay usable until they expire, as services validate them offline ([Delegated access](../testbed/delegated-access.md#user-control)).
 
 Checking it by hand ends the session's refresh tokens, so do it last, if at all: revoke the consent of the client in the profile, then try `refresh` once more.
 
