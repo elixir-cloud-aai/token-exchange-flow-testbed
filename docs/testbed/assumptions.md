@@ -41,6 +41,8 @@ Our own assumptions, from no statement at all:
 | C8 | Test accounts only, as sessions record their claims. | Our choice |
 | C9 | FOCA doesn't exchange tokens yet, so the testbed has its own small implementation. | FOCA 0.19.0 |
 | C10 | The new proxy stack may change the `aud` rule, `act` and lifetimes. Nothing specific to the current stack should be hard-coded in FOCA or proTES. | Follows from A3, A6, A7, C1 |
+| C11 | No sender-constrained tokens: the discovery document lists neither DPoP nor certificate-bound tokens. A refresh token is bound to a client only by that client's authentication, so only a confidential client's refresh token is bound to anything at all. | [What we've seen](#what-weve-seen), 2026-11-13 |
+| C12 | Nothing public says whether users can see or revoke a service's refresh tokens. The profile's "Revoke consent" withdraws a service's use of personal data; whether it also ends refresh tokens, we don't know. | [What public documents say](#what-public-documents-say) |
 
 ## What we've been unable to do
 
@@ -57,6 +59,9 @@ These pages describe Perun and its proxy. They cover several Perun instances, so
 - [Understanding consent pages](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/1742536712/Understanding+consent+pages+when+logging+in): users can deselect attributes at login, and withholding entitlements can break access.
 - [Perun roles and their rights](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/1760100400/Perun+roles+and+their+rights): lists assigning groups under Trusted facility admin, Resource admin and Resource self service, and not under Facility admin.
 - [Terms of Use for Service Providers](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/2137948170/Terms+of+Use+for+Service+Providers): apply to services that rely on LS AAI.
+- [Privacy: what data does Perun AAI keep about me?](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/1742700554/Privacy+What+data+does+Perun+AAI+keep+about+me): the user's profile has a Consents section, which lists the services a user has granted access to their personal data, with the attributes each one gets, and a **Revoke consent** button that "immediately withdraws the service's permission to use your personal information". It says nothing about refresh tokens or offline access ([C12](#constraints)).
+- The consent page (see above) is about attributes: which ones are released to the service, and which the user may deselect. It says nothing about offline access, or how long a service may act.
+- Nothing we found in the operator's pages (read on 2026-11-03) states lifetimes of refresh tokens, rotation, reuse detection, or what revoking does. For lifetimes, A6 and A7 are all we have.
 
 ## What we've seen
 
@@ -69,5 +74,10 @@ Public discovery documents, read on 2026-11-03, without credentials:
 | Scope `entitlements` | listed | not listed |
 
 The testbed uses `https://login.aai.lifescience-ri.eu/oidc/` by default. [A page on re-registration](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/2184773648/Service+Provider+Re-registration+for+use+LS+AAI+Eosc+compatible+AAI) names `https://login.aai.lifescience-ri.eu/cas/oidc` as the issuer for the LS AAI EOSC node, and says other production services still use the standard process. It doesn't say whether this is the new proxy stack, which is [a question for the event](../tests/index.md#questions-outside-the-tests). Being listed says nothing about what a given client may do.
+
+The `/oidc/` document again, on 2026-11-13, for [delegated access](delegated-access.md):
+
+- **Listed:** the scope `offline_access`; the grants `refresh_token` and token exchange; a revocation endpoint, `https://login.aai.lifescience-ri.eu/oidc/revoke`; an introspection endpoint; the token endpoint authentication methods `client_secret_basic`, `client_secret_post` and `none`.
+- **Not listed:** `prompt_values_supported`, `dpop_signing_alg_values_supported`, `tls_client_certificate_bound_access_tokens` and `backchannel_logout_supported`. A missing field doesn't prove that a feature is missing, but no standard way of binding tokens to a client instance is advertised ([C11](#constraints)).
 
 A login token of Krini's, seen by us on 2026-10-20: `typ` was `at+jwt`, and `aud` held the client's ID.
