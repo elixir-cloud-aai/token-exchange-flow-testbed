@@ -46,7 +46,7 @@ It **doesn't have:**
 Beyond that:
 
 - **Executed on the mock, not as a success:** the `tb>` lines of these docs are executed in each end-to-end run, except for `wait-expiry`, which takes as long as tokens live. Many of them end in a refusal, which counts as passing there. Those that need a refresh token from an exchange end in a usage error, which also counts.
-- **Never run at all, on the mock or elsewhere:** the real browser login (the mock run fills in its login form), `--flow device` (unit tests with a fake only), the public client's exchange, a refresh token from an exchange, a real rotation, entitlements that differ by client.
+- **Never run at all, on the mock or elsewhere:** the real browser login (the mock run fills in its login form), `--flow device` (unit tests with a fake only), the public client's exchange, a refresh token from an exchange, a real rotation, binding of refresh tokens to a client and reuse detection, entitlements that differ by client.
 - **Ran on the mock, but the results are no evidence:** `client_id`, `aud`, lifetimes and refresh tokens. In the mock, these follow our own `mock/oidc.json`.
 - **Refusals** of a subject without our client in `aud`, unregistered targets, tampered and expired subjects come from the testbed's own rules on the mock, with made-up error codes.
 - **`compose.lslogin.yaml`:** no automated test or CI job uses it. It's been started by hand with made-up client IDs, for `clients` and `discovery` only, and restarting the services with a session open has been tried, as has a request from the host reaching the callback. No login or exchange has gone through it.

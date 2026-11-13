@@ -34,7 +34,7 @@ Provider `lslogin`, `ls_login_rules_emulated: false`, all five clients, and toke
 tb> login user --as client
 ```
 
-The session shows a URL. Copy it into a browser, as a container can't open one, and log in with **account A**. It returns to `http://localhost:18994/callback`, which Compose forwards to the session. At the consent page, note what it lists, and don't deselect entitlements.
+The session shows a URL. Copy it into a browser, as a container can't open one, and log in with **account A**. It returns to `http://localhost:18994/callback`, which Compose forwards to the session. At the consent page, note what it lists, including whether it mentions offline access or how long the service may act ([Delegated access](../testbed/delegated-access.md#consent-once-explicitly)), and don't deselect entitlements.
 
 ### Hop 1: client to gateway
 
@@ -125,7 +125,7 @@ Discovery at `/oidc/` lists the auth method `none`, and at `/cas/oidc` doesn't (
 | Step | Record | Result |
 |---|---|---|
 | Provider and clients | Provider, grant types | |
-| Login | `sub`, `typ`, `aud`, `client_id`, `exp` minus `iat`, whether there's a refresh token, what the consent page lists | |
+| Login | `sub`, `typ`, `aud`, `client_id`, `exp` minus `iat`, whether there's a refresh token, what the consent page lists, and whether it mentions offline access | |
 | Hop 1 | Which parameter works, `aud`, `client_id`, `azp`, `exp` minus `iat`, `scope`, `typ` | |
 | URL form | `aud`, the status of the call | |
 | Hop 2 | `client_id` at each hop, `exp` minus `iat` at the node | |

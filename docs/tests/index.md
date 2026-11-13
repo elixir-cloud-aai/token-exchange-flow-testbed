@@ -100,6 +100,7 @@ Each one is explained on its test's page, with what its outcome changes.
 | What does "1 hour" cover, and is it capped by the subject token? | [T4](t4-lifetime.md#questions-it-answers) |
 | Can an exchange return a refresh token, limited to the next hop? | [T4](t4-lifetime.md#questions-it-answers) |
 | Is the 31 days idle or absolute, and do refresh tokens rotate? | [T4](t4-lifetime.md#questions-it-answers) |
+| Are refresh tokens bound to the client, and is reuse detected? | [T4](t4-lifetime.md#questions-it-answers) |
 | Is `act` coming? | [T5](t5-attribution.md#questions-it-answers) |
 
 ## Questions outside the tests
@@ -120,6 +121,16 @@ A page of the operator names that issuer for another node, and the discovery doc
 
 - **If it is:** do the rules we were told apply to it already? The testbed can be pointed to it with `TESTBED_ISSUER`.
 - **Which issuer should new test clients use?** Tokens of one aren't accepted by services that trust the other, so all services of a chain have to move together.
+
+### Can users see and revoke what a service holds?
+
+For [delegated access](../testbed/delegated-access.md#user-control), a user should be able to see that Conquest may act for them, and withdraw that at LS Login. The profile has "Revoke consent" per service ([C12](../testbed/assumptions.md#constraints)).
+
+- Does it also end the refresh tokens that the service holds? And the access tokens issued with them?
+- Does logging out at LS Login end refresh tokens?
+- **If neither:** only the service itself can stop further refreshes, by revoking at `/oidc/revoke`, and Conquest's docs have to say so to users. Either way, access tokens already issued stay usable until they expire, as services validate them offline ([Delegated access](../testbed/delegated-access.md#user-control)).
+
+Checking it by hand ends the session's refresh tokens, so do it last, if at all: revoke the consent of the client in the profile, then try `refresh` once more.
 
 ### Can registration be automated?
 

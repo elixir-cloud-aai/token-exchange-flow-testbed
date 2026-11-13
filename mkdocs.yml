@@ -71,6 +71,7 @@ nav:
   - Assumptions and constraints: testbed/assumptions.md
   - Actors and components: testbed/components.md
   - Testbed design: testbed/design.md
+  - Delegated access: testbed/delegated-access.md
   - Testbed limits: testbed/limits.md
   - Coverage: testbed/coverage.md
 - Setup:

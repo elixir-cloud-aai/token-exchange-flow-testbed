@@ -15,6 +15,7 @@ From the LS Login team, 2026-11-03: the lifetime is "currently 1 hour" ([A7](../
 3. If `exp` of the refresh token moves by the time elapsed, the limit is idle. If it stays, absolute. If introspection shows no `exp` and the token is opaque, only the LS Login team can tell.
 4. Whether an exchange returns a refresh token is unknown. If it does, its access token has `aud` = gateway, the call gives 200, and the last refresh is refused after revocation.
 5. An expired token gets 401 with the reason `expired`, an exchange of it is refused by LS Login, and the refresh still works.
+6. Another client can't redeem the client's refresh token ([RFC 6749, section 6](https://datatracker.ietf.org/doc/html/rfc6749#section-6)). Whether a rotated refresh token can be reused, and whether that ends the whole grant, is unknown.
 
 ## Steps
 
@@ -94,6 +95,19 @@ tb> refresh exp-new --as client --from exp
 
 Ctrl-C ends a wait without losing the tokens.
 
+### Binding and reuse
+
+In the same second session, as reuse detection may end every refresh token of a login, and later tests need those of the first. The client refreshes twice and reuses the older refresh token. Then another client tries the newest one:
+
+```text
+tb> refresh exp-new2 --as client --from exp-new
+tb> refresh exp-reuse --as client --from exp-new
+tb> refresh exp-after --as client --from exp-new2
+tb> refresh exp-other --as orchestrator --from exp-after
+```
+
+Only if `exp-new2` shows `refresh_token_rotated: true` does the reuse mean anything. Then a refused `exp-reuse` shows that rotation is enforced, and a refused `exp-after` that reuse ended the grant. The other client is the orchestrator, as its registration has the refresh token flow, so a refusal is about the token, not about the flow. If it worked, the refresh token isn't bound to the client, which is a result of its own. If `exp-after` was refused, `exp-other` has no token to try: log in again with `login exp2 --as client`, then use `--from exp2`. See [Delegated access](../testbed/delegated-access.md#bounded-grant) for why this matters.
+
 ## Questions it answers
 
 ### What does "1 hour" cover, and is it capped by the subject token?
@@ -113,8 +127,14 @@ Lifetimes stay configurable in FOCA either way, as the new stack will change the
 ### Is the 31 days idle or absolute, and do refresh tokens rotate?
 
 - **Absolute:** it's the maximum length of a run, which goes into Conquest's docs.
-- **Idle:** runs are unlimited, as long as they refresh in time.
+- **Idle:** runs can go on as long as they refresh in time, unless the grant has a cap of its own, which only the LS Login team can confirm.
 - **Rotation:** FOCA's helper has to store the new token atomically, as a lost one ends the run.
+
+### Are refresh tokens bound to the client, and is reuse detected?
+
+- **Bound:** a refresh token that leaks from the workflow system is of no use to another client without that client's secret, too. If not, a refresh token has to be treated like a password of the user's.
+- **Reuse detected:** a leaked refresh token that is used ends the run, too, so leaks show. FOCA's helper then reports that the grant has ended, rather than retrying.
+- **Neither:** the 31 days are all that limits a leaked refresh token, unless it's revoked.
 
 ## What to record
 
@@ -126,3 +146,4 @@ Lifetimes stay configurable in FOCA either way, as the new stack will change the
 | Refresh token from an exchange | Whether either holds a refresh token, and `issued_token_type` | |
 | Only if that returned one | `aud`, status of the call, the refresh after revoking | |
 | Expired token | `sub` compared with the first login, status and reason, the exchange's error, the refresh | |
+| Binding and reuse | Whether `exp-other` was refused, `refresh_token_rotated` of `exp-new2`, and whether `exp-reuse` and `exp-after` were refused, with errors | |
