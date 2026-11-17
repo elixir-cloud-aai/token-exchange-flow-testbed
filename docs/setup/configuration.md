@@ -55,7 +55,7 @@ docker compose -f compose.lslogin.yaml up -d --force-recreate --no-deps --wait s
 
 ## Results {#results}
 
-`--record /results/<file>` appends decoded results to `results/<file>` in the repository's folder. There are no tokens in it, but it does hold the claims of the accounts used, so use test accounts only, and delete it when done.
+`--record /results/<file>` appends decoded results to `results/<file>` in the repository's folder. There are no tokens in it, but it does hold the claims of the accounts used, so use test accounts only (or see [Client registration](client-registration.md#two-test-accounts) if there are none), and delete it when done.
 
 The session's container runs as user 1000. On Linux, if your user has another ID, a session with `--record` says that it can't write the file. Pass your IDs:
 

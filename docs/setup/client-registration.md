@@ -12,6 +12,12 @@ Only needed for LS Login. Do it as early as possible: we don't know whether regi
 
 Use test accounts only: sessions record their claims. If you need one, [Life Science Hostel accounts](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/1741881406/Using+Life+Science+Hostel+account) don't depend on an institution. To see what an account belongs to, see [Checking your membership](https://perunaai.atlassian.net/wiki/spaces/PERUN/pages/1742635055/Checking+your+membership). How to add one to a group depends on the group's managers.
 
+**If no test accounts can be had,** e.g., while LS Login has paused new registrations, the accounts of people taking part can stand in, on these terms:
+
+- Tell the account holders beforehand what is recorded: decoded claims of their tokens and user info, such as `sub`, entitlements and, if released, names and emails. Go on only with their agreement.
+- Records stay out of the repository: `results/` is git-ignored, and is deleted after the session ([Configuration](configuration.md#results)).
+- Results, docs and issues use placeholders for `sub`, names and emails, e.g., `<sub of account A>`.
+
 ## Five clients
 
 Register them at the [service registration app](https://services.aai.lifescience-ri.eu/), in this order, because each one lists the IDs of the next. Note each client ID and secret, and put them only in `lslogin.env` (see [Configuration](configuration.md)). The identifiers under `elixir-on.cloud` never need to resolve.
