@@ -132,7 +132,7 @@ For [delegated access](../testbed/delegated-access.md#user-control), a user shou
 - Does logging out at LS Login end refresh tokens?
 - **If neither:** only the service itself can stop further refreshes, by revoking at `/oidc/revoke`, and Conquest's docs have to say so to users. Either way, access tokens already issued stay usable until they expire, as services validate them offline ([Delegated access](../testbed/delegated-access.md#user-control)).
 
-Checking it by hand ends the refresh tokens of both sessions, as both log in account A with `tx-test-client`. So do it last, if at all, after the expiry session's [binding and reuse](t4-lifetime.md#binding-and-reuse) lines have run: see [Revoking consent](t4-lifetime.md#revoking-consent-last).
+Checking it by hand ends the refresh tokens of both sessions, as both log in account A with `tx-test-client`. So do it last, if at all, after the expiry session's [binding and reuse](t4-lifetime.md#binding-and-reuse) lines have run: see [Revoking consent](t5-attribution.md#revoking-consent-last), at the end of T5.
 
 ### Can registration be automated?
 

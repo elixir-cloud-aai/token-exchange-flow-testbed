@@ -73,13 +73,14 @@ The gateway's own exchange names the node as `TESTBED_TARGET_PARAM` says, by def
 
 ```text
 tb> exchange t1-node-id --as gateway --from to-gw --audience @node
+tb> exchange t1-node-res --as gateway --from to-gw --resource @node
 tb> exchange t1-node-url --as gateway --from to-gw --resource @node.url
 tb> exchange t1-node-both --as gateway --from to-gw --audience @node --resource @node.url
 tb> show t1-node-id
 tb> call node --token t1-node-id
 ```
 
-Use `show` and `call node` on one that worked, in place of `t1-node-id`. Then set `TESTBED_TARGET_PARAM` for T2-T5 in `lslogin.env`, and [restart the services](../setup/configuration.md#changing-settings-during-a-session): `audience` if the ID works, `resource-url` if only the URL form does, `both` if only both together do. With `resource-url`, the gateway also gets a token with only its URL in `aud` in the orchestrator variant below, which it can't exchange again (expectation 5): a 502 there is then expected.
+Use `show` and `call node` on one that worked, in place of `t1-node-id`. Then set `TESTBED_TARGET_PARAM` for T2-T5 in `lslogin.env`, and [restart the services](../setup/configuration.md#changing-settings-during-a-session): `audience` if the ID works in `audience`, `resource` if it only works in `resource`, `resource-url` if only the URL form does, `both` if only both together do. With `resource-url`, the gateway also gets a token with only its URL in `aud` in the orchestrator variant below, which it can't exchange again (expectation 5): a 502 there is then expected.
 
 ### Variant: client to orchestrator, orchestrator to gateway
 
@@ -143,7 +144,7 @@ Discovery at `/oidc/` lists the auth method `none`, and at `/cas/oidc` doesn't (
 | Hop 1 | Which parameter works, `aud`, `client_id`, `azp`, `exp` minus `iat`, `scope`, `typ` | |
 | URL form | `aud`, the status of the call | |
 | Hop 2 | `client_id` at each hop, `exp` minus `iat` at the node | |
-| Which form names the node | Which of the three exchanges worked, `aud` of that token, the status of `call node`, and the `TESTBED_TARGET_PARAM` set for T2-T5 | |
+| Which form names the node | Which of the four exchanges worked, `aud` of that token, the status of `call node`, and the `TESTBED_TARGET_PARAM` set for T2-T5 | |
 | Orchestrator | Status, `aud` at each hop | |
 | Public client | Both results, and the error if any; "not registered" without a public client | |
 | Registration app | What it accepted, and anything that needed approval | |

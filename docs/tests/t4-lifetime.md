@@ -108,17 +108,6 @@ tb> refresh exp-other --as orchestrator --from exp-after
 
 Only if `exp-new2` shows `refresh_token_rotated: true` does the reuse mean anything. Then a refused `exp-reuse` shows that rotation is enforced, and a refused `exp-after` that reuse ended the grant. The other client is the orchestrator, as its registration has the refresh token flow, so a refusal is about the token, not about the flow. If it worked, the refresh token isn't bound to the client, which is a result of its own. If `exp-after` was refused, `exp-other` has no token to try: log in again with `login exp2 --as client`, then use `--from exp2`. See [Delegated access](../testbed/delegated-access.md#bounded-grant) for why this matters.
 
-### Revoking consent, last
-
-Optional, and only after every other step of T1-T5, in both sessions: it ends the refresh tokens of both, as both log in account A with `tx-test-client` ([Can users see and revoke what a service holds?](index.md#can-users-see-and-revoke-what-a-service-holds)). In the profile of account A, revoke the consent of the client. Then, in the main session, refresh right away, and again 5 minutes later, so that a delayed revocation shows:
-
-```text
-tb> refresh rv1 --as client --from r2
-tb> refresh rv2 --as client --from r2
-```
-
-If `rv1` worked and showed `refresh_token_rotated: true`, use `--from rv1` for the second one.
-
 ## Questions it answers
 
 ### What does "1 hour" cover, and is it capped by the subject token?
@@ -157,5 +146,4 @@ Lifetimes stay configurable in FOCA either way, as the new stack will change the
 | Refresh token from an exchange | Whether either holds a refresh token, and `issued_token_type` | |
 | Only if that returned one | `aud`, status of the call, the refresh after revoking | |
 | Expired token | `sub` compared with the first login, status and reason, the exchange's error, the refresh | |
-| Revoking consent | Whether `rv1` and `rv2` were refused, with errors, and the time between revoking and each | |
 | Binding and reuse | Whether `exp-other` was refused, `refresh_token_rotated` of `exp-new2`, and whether `exp-reuse` and `exp-after` were refused, with errors | |
