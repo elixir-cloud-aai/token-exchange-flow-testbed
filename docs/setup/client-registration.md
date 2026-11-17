@@ -24,6 +24,8 @@ Register them at the [service registration app](https://services.aai.lifescience
 | `tx-test-client` | Krini with a backend | confidential | authorization code with PKCE, refresh token, token exchange, device code | `openid`, `entitlements`, `offline_access` |
 | `tx-test-public` | Krini without a backend | public, PKCE | as `tx-test-client` | as `tx-test-client` |
 
+Other clients of the same issuer got entitlements with the scope and claim `eduperson_entitlement` ([What we've seen](../testbed/assumptions.md#what-weve-seen)). If [T3](../tests/t3-groups.md) shows none with `entitlements`, ask for `eduperson_entitlement` on each client, too.
+
 Redirect URI of the last two: `http://localhost:18994/callback`. The others have none.
 
 Resource indicators:

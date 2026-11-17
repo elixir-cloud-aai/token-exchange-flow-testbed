@@ -30,7 +30,7 @@
 
 **A token is "not yet valid".** Check the machine's clock: as in FOCA, there's no leeway.
 
-**A node answers 502 with `refused: userinfo`.** The node couldn't find out the entitlements: `entitlements_error` in its row says why. This isn't a decision about the user. Perhaps the exchanged token lacks a scope for user info: see `TESTBED_EXCHANGE_SCOPE`.
+**A node answers 502 with `refused: userinfo`.** The node couldn't find out the entitlements: `entitlements_error` in its row says why, e.g., a claim in `TESTBED_ENTITLEMENT_CLAIMS` that isn't a list of strings. This isn't a decision about the user. Perhaps the exchanged token lacks a scope for user info: see `TESTBED_EXCHANGE_SCOPE`.
 
 **A node answers 403 for a member of the group.** The release is probably missing on the exchanging client ([C4](../testbed/assumptions.md#constraints)). Check `entitlement_claims` in the node's row, too: if it's empty, user info held none of the claims in `TESTBED_ENTITLEMENT_CLAIMS`. Compare with what `userinfo` shows, and add the claim that holds them.
 

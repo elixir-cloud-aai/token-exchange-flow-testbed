@@ -111,39 +111,51 @@ class Service:
         """Get the user's entitlements from user info, as computed for this token.
 
         The values are the union of all configured claims, in order of
-        appearance, as providers differ in the claim they release them in.
+        appearance, as providers differ in the claim they release them in. A
+        claim that is `null` counts as absent. A claim of another type is
+        skipped and named in `error`: the policy then allows the user only if
+        another claim holds the entitlement, and otherwise makes no decision.
 
         Args:
             token: Validated access token.
             claims: Verified claims of the token.
 
         Returns:
-            Entitlements and the names of the claims they were read from, or
-            the reason why there are none to show.
+            Entitlements, the names of the claims they were read from, and the
+            reason why some or all couldn't be read, if any.
         """
         try:
             userinfo = self.tokens.userinfo(token)
         except Refused as exc:
-            return {"values": [], "error": exc.view()}
+            return {"values": [], "claims": [], "error": exc.view()}
         except Exception:
             logger.exception("User info request failed")
-            return {"values": [], "error": "user info request failed"}
+            return {"values": [], "claims": [], "error": "user info request failed"}
         if userinfo.get("sub") != claims.get("sub"):
-            return {"values": [], "error": "user info is about another subject"}
+            return {
+                "values": [],
+                "claims": [],
+                "error": "user info is about another subject",
+            }
         values: dict[str, None] = {}
         sources = []
+        invalid = []
         for name in self.settings.entitlement_claims:
-            if name not in userinfo:
+            found = userinfo.get(name)
+            if found is None:
                 continue
-            found = userinfo[name]
             found = [found] if isinstance(found, str) else found
             if not isinstance(found, list) or not all(
                 isinstance(item, str) for item in found
             ):
-                return {"values": [], "error": f"{name} is not a list of strings"}
+                invalid.append(name)
+                continue
             sources.append(name)
             values.update(dict.fromkeys(found))
-        return {"values": list(values), "claims": sources}
+        result: dict[str, Any] = {"values": list(values), "claims": sources}
+        if invalid:
+            result["error"] = f"{', '.join(invalid)}: not a list of strings"
+        return result
 
     def check(self, headers: Any) -> RequestContext:
         """Check an incoming request.

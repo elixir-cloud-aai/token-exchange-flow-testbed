@@ -100,6 +100,15 @@ def test_hop_rows_handles_refusals() -> None:
     rows = hop_rows({"service": "node", "refused": "token", "reason": "audience"})
     assert rows[0]["reason"] == "audience"
     assert rows[0]["sub"] is None
+    assert rows[0]["entitlement_claims"] is None
+
+
+def test_hop_rows_name_the_entitlement_claims() -> None:
+    """T3 records which claim the node read entitlements from."""
+    entitlements = {"values": ["urn:a"], "claims": ["eduperson_entitlement"]}
+    rows = hop_rows({"service": "node", "entitlements": entitlements})
+    assert rows[0]["entitlements"] == ["urn:a"]
+    assert rows[0]["entitlement_claims"] == ["eduperson_entitlement"]
 
 
 def test_tamper_changes_only_the_signature(provider: FakeProvider) -> None:

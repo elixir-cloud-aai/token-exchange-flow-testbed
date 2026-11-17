@@ -487,19 +487,58 @@ def test_no_entitlement_claim_is_403_and_names_no_claim(
     assert response.get_json()["entitlements"] == {"values": [], "claims": []}
 
 
+@pytest.mark.parametrize(
+    ("good", "status", "policy"),
+    [([ENTITLEMENT], 200, "allowed"), (["urn:a"], 502, "unknown")],
+    ids=["entitlement in the other claim", "entitlement nowhere"],
+)
 def test_a_wrong_type_in_one_claim_names_that_claim(
-    node: FlaskClient, provider: FakeProvider
+    node: FlaskClient,
+    provider: FakeProvider,
+    good: list[str],
+    status: int,
+    policy: str,
 ) -> None:
-    """An odd value in one claim is an error, even if the other one is fine."""
+    """An odd claim is skipped and named; only the other claim can allow.
+
+    Args:
+        node: Test client of the node.
+        provider: Fake provider.
+        good: Value of the claim with the right type.
+        status: Expected status.
+        policy: Expected decision of the policy.
+    """
     base = provider.issuer.rstrip("/")
     provider.routes[f"{base}/userinfo"] = lambda _url, _kw: FakeResponse(
         200,
-        {"sub": "user-1", "entitlements": [ENTITLEMENT], "eduperson_entitlement": 1},
+        {"sub": "user-1", "entitlements": good, "eduperson_entitlement": 1},
     )
     response = node.get("/report", headers=_bearer(provider.mint()))
-    assert response.status_code == 502
-    error = response.get_json()["entitlements"]["error"]
-    assert error == "eduperson_entitlement is not a list of strings"
+    assert response.status_code == status
+    body = response.get_json()
+    assert body["policy"] == policy
+    assert body["entitlements"] == {
+        "values": good,
+        "claims": ["entitlements"],
+        "error": "eduperson_entitlement: not a list of strings",
+    }
+
+
+def test_a_null_claim_counts_as_absent(
+    node: FlaskClient, provider: FakeProvider
+) -> None:
+    """`null` in a claim isn't an error: the other claim decides."""
+    base = provider.issuer.rstrip("/")
+    provider.routes[f"{base}/userinfo"] = lambda _url, _kw: FakeResponse(
+        200,
+        {"sub": "user-1", "entitlements": None, "eduperson_entitlement": ENTITLEMENT},
+    )
+    response = node.get("/report", headers=_bearer(provider.mint()))
+    assert response.status_code == 200
+    assert response.get_json()["entitlements"] == {
+        "values": [ENTITLEMENT],
+        "claims": ["eduperson_entitlement"],
+    }
 
 
 def test_entitlement_claims_can_be_configured(provider: FakeProvider) -> None:

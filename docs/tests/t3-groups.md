@@ -33,7 +33,7 @@ tb> exchange to-node-s --as gateway --from to-gw --audience @node --scope "openi
 tb> userinfo to-node-s
 ```
 
-The node reads entitlements from `entitlements` and `eduperson_entitlement` (`TESTBED_ENTITLEMENT_CLAIMS`), and its row names the claims it found them in (`entitlement_claims`). Note which of the two `userinfo user` shows. If it shows neither, try the other scope once, and note whether the registration allows it:
+The node reads entitlements from `entitlements` and `eduperson_entitlement` (`TESTBED_ENTITLEMENT_CLAIMS`), and its row names the claims it found them in (`entitlement_claims`). Note which of the two `userinfo user` shows. If it shows neither, log in with account A again, with the other scope, once, and note whether the registration allows it:
 
 ```text
 tb> login u2 --as client --scope "openid eduperson_entitlement offline_access"
@@ -107,7 +107,7 @@ We derived the example from a known entitlement of the same form ([A12](../testb
 | Step | Record | Result |
 |---|---|---|
 | Release per client | The entitlements for each line. Does `introspect --as node` differ? Does the exchange need the `scope`? | |
-| Exact value | The entitlement in user info, compared with `TESTBED_REQUIRED_ENTITLEMENT`; the claim it came in (`entitlements` or `eduperson_entitlement`) and the scope it took | |
+| Exact value | The entitlement in user info, compared with `TESTBED_REQUIRED_ENTITLEMENT`; the claim it came in (`entitlements` or `eduperson_entitlement`) and the scope it took: `entitlements`, or `eduperson_entitlement` from `u2`, and whether the registration allowed that | |
 | Account A | Status, `policy` and `entitlement_claims` at the node | |
 | Account B | Login, exchange, status and `refused` at the node | |
 | Group release | Which role it took, and who granted it | TrustedFacilityAdmin within the relevant VO; not granted for this setup, so the VO admins assign groups on request ([Client registration](../setup/client-registration.md#who-can-assign-groups)) |
