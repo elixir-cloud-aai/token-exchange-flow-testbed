@@ -218,7 +218,8 @@ class Service:
 
         A user without the entitlement is told so (403) rather than treated as
         unauthenticated (401), so that portals can offer a way to get access. If
-        user info gave no answer, nobody knows, so that isn't a 403 (502).
+        the entitlements couldn't be fully read, and those that could don't hold
+        it, nobody knows, so that isn't a 403 (502).
 
         Args:
             report: Report of the service, updated with the decision.

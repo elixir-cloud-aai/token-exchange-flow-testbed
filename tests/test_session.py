@@ -105,10 +105,15 @@ def test_hop_rows_handles_refusals() -> None:
 
 def test_hop_rows_name_the_entitlement_claims() -> None:
     """T3 records which claim the node read entitlements from."""
-    entitlements = {"values": ["urn:a"], "claims": ["eduperson_entitlement"]}
+    entitlements = {
+        "values": ["urn:a"],
+        "claims": ["eduperson_entitlement"],
+        "error": "entitlements: not a list of strings",
+    }
     rows = hop_rows({"service": "node", "entitlements": entitlements})
     assert rows[0]["entitlements"] == ["urn:a"]
     assert rows[0]["entitlement_claims"] == ["eduperson_entitlement"]
+    assert rows[0]["entitlements_error"] == "entitlements: not a list of strings"
 
 
 def test_tamper_changes_only_the_signature(provider: FakeProvider) -> None:

@@ -54,9 +54,9 @@ Tokens are kept under names you choose. Targets in `--audience` and `--resource`
 | `exchange <name>` | Exchanges a token; `--as` is the exchanging client | `--as <role>`, `--from <token>`, `--audience`, `--resource`, `--scope`, `--requested-type access\|refresh`, `--auth auto\|basic\|post\|none`, `--tamper-subject`, `--no-rules` |
 | `refresh <name>` | Redeems the refresh token held by a token of the session | `--as <role>`, `--from <token>`, `--audience`, `--resource`, `--scope` |
 | `credentials <name>` | Gets a client's own token | `--as <role>`, `--scope` |
-| `call <service>` | Calls a service with a token and shows what each hop saw, including the node's `entitlements` and the claims they came from (`entitlement_claims`) | `--token <token>`, `--save <name>`, `--hop-limit`, `--traceparent`, `--tamper`, `--id-token`, `--full` |
+| `call <service>` | Calls a service with a token and shows what each hop saw, including the node's `entitlements` the claims they came from (`entitlement_claims`), and why some couldn't be read (`entitlements_error`) | `--token <token>`, `--save <name>`, `--hop-limit`, `--traceparent`, `--tamper`, `--id-token`, `--full` |
 | `show <name>` | Shows the decoded claims of a token | |
-| `userinfo <name>` | Calls user info with a token; shows released entitlements, in whichever claim they come | |
+| `userinfo <name>` | Calls user info with a token; shows all released claims, e.g., `entitlements` or `eduperson_entitlement` | |
 | `introspect <name>` | Introspects a token as a client | `--as <role>`, `--refresh` |
 | `revoke <name>` | Revokes a token as a client | `--as <role>`, `--refresh` |
 | `wait-expiry <name>` | Blocks until a token has expired; Ctrl-C ends the wait | `--margin <seconds>` |
