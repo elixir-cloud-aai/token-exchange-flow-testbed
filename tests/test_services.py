@@ -420,3 +420,97 @@ def test_tokens_without_times_have_no_lifetime() -> None:
     """A lifetime is only stated if the claims allow it."""
     assert _lifetime({"exp": 10, "iat": 4}) == {"exp_minus_iat": 6}
     assert _lifetime({"exp": 10}) == {"exp_minus_iat": None}
+
+
+@pytest.mark.parametrize(
+    ("userinfo", "values", "claims"),
+    [
+        (
+            {"eduperson_entitlement": [ENTITLEMENT]},
+            [ENTITLEMENT],
+            ["eduperson_entitlement"],
+        ),
+        ({"entitlements": [ENTITLEMENT]}, [ENTITLEMENT], ["entitlements"]),
+        (
+            {
+                "entitlements": [ENTITLEMENT, "urn:a"],
+                "eduperson_entitlement": ["urn:a", ENTITLEMENT, "urn:b"],
+            },
+            [ENTITLEMENT, "urn:a", "urn:b"],
+            ["entitlements", "eduperson_entitlement"],
+        ),
+        (
+            {"eduperson_entitlement": ENTITLEMENT},
+            [ENTITLEMENT],
+            ["eduperson_entitlement"],
+        ),
+    ],
+    ids=["eduperson only", "entitlements only", "both", "single string"],
+)
+def test_entitlements_come_from_either_claim(
+    node: FlaskClient,
+    provider: FakeProvider,
+    userinfo: dict[str, Any],
+    values: list[str],
+    claims: list[str],
+) -> None:
+    """LS Login may release `eduperson_entitlement` rather than `entitlements`.
+
+    Args:
+        node: Test client of the node.
+        provider: Fake provider.
+        userinfo: User info, apart from `sub`.
+        values: Expected entitlements, as a union in order of appearance.
+        claims: Expected names of the claims that held them.
+    """
+    base = provider.issuer.rstrip("/")
+    provider.routes[f"{base}/userinfo"] = lambda _url, _kw: FakeResponse(
+        200, {"sub": "user-1", **userinfo}
+    )
+    response = node.get("/report", headers=_bearer(provider.mint()))
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body["policy"] == "allowed"
+    assert body["entitlements"] == {"values": values, "claims": claims}
+
+
+def test_no_entitlement_claim_is_403_and_names_no_claim(
+    node: FlaskClient, provider: FakeProvider
+) -> None:
+    """Without either claim, the user lacks the group: 403, no claim named."""
+    base = provider.issuer.rstrip("/")
+    provider.routes[f"{base}/userinfo"] = lambda _url, _kw: FakeResponse(
+        200, {"sub": "user-1"}
+    )
+    response = node.get("/report", headers=_bearer(provider.mint()))
+    assert response.status_code == 403
+    assert response.get_json()["entitlements"] == {"values": [], "claims": []}
+
+
+def test_a_wrong_type_in_one_claim_names_that_claim(
+    node: FlaskClient, provider: FakeProvider
+) -> None:
+    """An odd value in one claim is an error, even if the other one is fine."""
+    base = provider.issuer.rstrip("/")
+    provider.routes[f"{base}/userinfo"] = lambda _url, _kw: FakeResponse(
+        200,
+        {"sub": "user-1", "entitlements": [ENTITLEMENT], "eduperson_entitlement": 1},
+    )
+    response = node.get("/report", headers=_bearer(provider.mint()))
+    assert response.status_code == 502
+    error = response.get_json()["entitlements"]["error"]
+    assert error == "eduperson_entitlement is not a list of strings"
+
+
+def test_entitlement_claims_can_be_configured(provider: FakeProvider) -> None:
+    """Only the configured claims count."""
+    env = {**LS_ENV, "TESTBED_ENTITLEMENT_CLAIMS": "groups"}
+    client = create_node(load_settings(env, "lslogin"), provider).test_client()
+    base = provider.issuer.rstrip("/")
+    provider.routes[f"{base}/userinfo"] = lambda _url, _kw: FakeResponse(
+        200,
+        {"sub": "user-1", "groups": [ENTITLEMENT], "eduperson_entitlement": 1},
+    )
+    response = client.get("/report", headers=_bearer(provider.mint()))
+    assert response.status_code == 200
+    assert response.get_json()["entitlements"]["claims"] == ["groups"]

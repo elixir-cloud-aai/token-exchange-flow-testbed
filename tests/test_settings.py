@@ -82,3 +82,29 @@ def test_resource_url_needs_the_urls_of_the_next_hops() -> None:
     env["TESTBED_NODE_RESOURCE"] = "https://node.example/"
     env["TESTBED_GATEWAY_RESOURCE"] = "https://gateway.example/"
     assert load_settings(env, "lslogin").target_param == "resource-url"
+
+
+@pytest.mark.parametrize(
+    ("provider", "env"), [("mock", {}), ("lslogin", LS_ENV)], ids=["mock", "lslogin"]
+)
+def test_entitlement_claims_default_to_both_names(
+    provider: str, env: dict[str, str]
+) -> None:
+    """Both the AARC-G069 name and the one LS Login was seen to release.
+
+    Args:
+        provider: Provider.
+        env: Environment variables.
+    """
+    claims = load_settings(env, provider).entitlement_claims
+    assert claims == ("entitlements", "eduperson_entitlement")
+    empty = load_settings({**env, "TESTBED_ENTITLEMENT_CLAIMS": ""}, provider)
+    assert empty.entitlement_claims == claims
+
+
+def test_entitlement_claims_are_a_comma_separated_list() -> None:
+    """Spaces, empty items and repeats are ignored; nothing left is an error."""
+    env = {**LS_ENV, "TESTBED_ENTITLEMENT_CLAIMS": " a , ,b,a "}
+    assert load_settings(env, "lslogin").entitlement_claims == ("a", "b")
+    with pytest.raises(ValueError, match="TESTBED_ENTITLEMENT_CLAIMS"):
+        load_settings({**LS_ENV, "TESTBED_ENTITLEMENT_CLAIMS": " , "}, "lslogin")

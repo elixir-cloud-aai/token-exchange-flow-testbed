@@ -110,12 +110,16 @@ class Service:
     def _entitlements(self, token: str, claims: dict[str, Any]) -> dict[str, Any]:
         """Get the user's entitlements from user info, as computed for this token.
 
+        The values are the union of all configured claims, in order of
+        appearance, as providers differ in the claim they release them in.
+
         Args:
             token: Validated access token.
             claims: Verified claims of the token.
 
         Returns:
-            Entitlements, or the reason why there are none to show.
+            Entitlements and the names of the claims they were read from, or
+            the reason why there are none to show.
         """
         try:
             userinfo = self.tokens.userinfo(token)
@@ -126,13 +130,20 @@ class Service:
             return {"values": [], "error": "user info request failed"}
         if userinfo.get("sub") != claims.get("sub"):
             return {"values": [], "error": "user info is about another subject"}
-        found = userinfo.get("entitlements", [])
-        found = [found] if isinstance(found, str) else found
-        if not isinstance(found, list) or not all(
-            isinstance(item, str) for item in found
-        ):
-            return {"values": [], "error": "entitlements is not a list of strings"}
-        return {"values": found}
+        values: dict[str, None] = {}
+        sources = []
+        for name in self.settings.entitlement_claims:
+            if name not in userinfo:
+                continue
+            found = userinfo[name]
+            found = [found] if isinstance(found, str) else found
+            if not isinstance(found, list) or not all(
+                isinstance(item, str) for item in found
+            ):
+                return {"values": [], "error": f"{name} is not a list of strings"}
+            sources.append(name)
+            values.update(dict.fromkeys(found))
+        return {"values": list(values), "claims": sources}
 
     def check(self, headers: Any) -> RequestContext:
         """Check an incoming request.

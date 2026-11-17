@@ -660,6 +660,19 @@ def test_provider_problems_are_named(session: Session, provider: FakeProvider) -
     assert "Discovery failed" in session.execute("discovery")["provider_problem"]
 
 
+def test_discovery_shows_scopes_and_claims(
+    session: Session, provider: FakeProvider
+) -> None:
+    """T1 records which entitlement scope and claim the provider advertises."""
+    provider.discovery_overrides = {
+        "scopes_supported": ["openid", "eduperson_entitlement"],
+        "claims_supported": ["sub", "eduperson_entitlement"],
+    }
+    result = session.execute("discovery")
+    assert result["scopes_supported"] == ["openid", "eduperson_entitlement"]
+    assert result["claims_supported"] == ["sub", "eduperson_entitlement"]
+
+
 def test_parser_never_exits() -> None:
     """Argparse's way out would end the session and lose its tokens."""
     with pytest.raises(UsageError, match="the problem"):
