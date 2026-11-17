@@ -80,7 +80,7 @@ The VO admins perform group assignments to the resource. The client maintainer c
 
 1. Create a resource for the relevant VO on the facility representing the client.
 2. Send the VO admins links to the resource and the groups to assign. Ask them to complete the assignment and confirm it. Verify that the groups appear among the resource's assigned groups.
-3. Log in with a test account belonging to the assigned group, and use the session's `userinfo <token-name>` command to inspect the released entitlements. Compare the exact value with `TESTBED_REQUIRED_ENTITLEMENT` in `lslogin.env`; do not assume the example value matches.
+3. Log in with a test account belonging to the assigned group, and use the session's `userinfo <token-name>` command to inspect the released entitlements. Compare the exact value with `TESTBED_REQUIRED_ENTITLEMENT` in `lslogin.env`; do not assume the example value matches. Note the claim it came in, too: `entitlements` or `eduperson_entitlement` ([What we've seen](../testbed/assumptions.md#what-weve-seen)).
 4. Repeat the release setup for each service that needs it. For this testbed, follow the facility list above, preserving the deliberate omission for the orchestrator in T3.
 5. Use T3 to verify that a user outside the required group can still log in but receives 403 from the node.
 

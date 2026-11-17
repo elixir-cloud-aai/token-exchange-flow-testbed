@@ -26,7 +26,7 @@ tb> clients
 tb> discovery
 ```
 
-Provider `lslogin`, `ls_login_rules_emulated: false`, all five clients, and token exchange among the grant types. No testbed rule applies from here on: refusals are LS Login's own, with `refused_by: provider`.
+Provider `lslogin`, `ls_login_rules_emulated: false`, all five clients, and token exchange among the grant types. Note which of `entitlements` and `eduperson_entitlement` are in `scopes_supported` and `claims_supported`: the node reads both claims ([T3](t3-groups.md)). No testbed rule applies from here on: refusals are LS Login's own, with `refused_by: provider`.
 
 ### Login: user to client
 
@@ -124,7 +124,7 @@ Discovery at `/oidc/` lists the auth method `none`, and at `/cas/oidc` doesn't (
 
 | Step | Record | Result |
 |---|---|---|
-| Provider and clients | Provider, grant types | |
+| Provider and clients | Provider, grant types, and which entitlement scopes and claims are listed | |
 | Login | `sub`, `typ`, `aud`, `client_id`, `exp` minus `iat`, whether there's a refresh token, what the consent page lists, and whether it mentions offline access | |
 | Hop 1 | Which parameter works, `aud`, `client_id`, `azp`, `exp` minus `iat`, `scope`, `typ` | |
 | URL form | `aud`, the status of the call | |
