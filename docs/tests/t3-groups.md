@@ -4,7 +4,7 @@
 
 Which entitlements does each client see, does the node's policy work through the chain, and can people outside a group still log in? Uses the tokens of [T1](t1-call-chain.md) and [T2](t2-refused.md), in the same session. Needs the [group release](../setup/client-registration.md#group-release) set up, and otherwise shows what happens without it.
 
-**Runs against:** LS Login. The mock has no entitlements per client, so there it only shows that the commands work. It does show a node's 403, under [Checking the setup](../setup/checking.md#a-user-outside-the-group).
+**Runs against:** LS Login. The mock has no entitlements per client, so there it only shows that the commands work. It does show a node's 403, under [Checking the setup](../setup/checking.md#a-user-outside-the-group). On the mock, `login b` logs in the mock's member, so B's 403 needs `login b --as client --mock-user outside` there.
 
 From the LS Login team, 2026-11-03: entitlements are computed for the client calling the exchange ([A5](../testbed/assumptions.md#assumptions)), and they come from assigning a group to a resource on the service's facility ([A9](../testbed/assumptions.md#assumptions)).
 
@@ -50,7 +50,7 @@ A 403 here, for a member of the group, means that the release is missing on the 
 
 ### Account B must not be locked out
 
-Paste the URL into a private window, so that the browser's session for A isn't used.
+B logs in on the machine that runs the session, as the login returns to `http://localhost:18994/callback` there: B can't use their own computer. Paste the URL into a private window on that machine, so that the browser's session for A isn't used, and B types their credentials within 5 minutes of `login b`. The four lines take about 10 minutes; plan B's slot ([Order for a live session](index.md#order-for-a-live-session)).
 
 ```text
 tb> login b --as client --no-browser

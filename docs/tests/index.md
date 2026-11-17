@@ -17,15 +17,17 @@
 
 Prepare, as early as possible:
 
-1. Accounts, clients and group release: see [Client registration](../setup/client-registration.md). We don't know whether registrations need approval.
+1. Accounts, clients and group release: see [Client registration](../setup/client-registration.md). We don't know whether registrations need approval. Plan a slot of about 10 minutes for account B in [T3](t3-groups.md#account-b-must-not-be-locked-out): B logs in on the machine that runs the session, not on their own, as the login returns to `localhost` there.
 2. `lslogin.env`: see [Configuration](../setup/configuration.md).
 3. The [automated run against the mock](../setup/checking.md#the-automated-run) must pass.
 4. Try T1 up to the second hop once beforehand, so that the session isn't spent on registration mistakes.
-5. **At least an hour before you need the result,** start [the expiry part of T4](t4-lifetime.md#expired-token), as it takes as long as tokens live. It runs in its own terminal.
+5. **At least an hour before you need the result,** start [the expiry part of T4](t4-lifetime.md#expired-token), as it takes as long as tokens live. It runs in its own terminal, and goes first: the login callback only listens during a `login`, for up to 5 minutes, and two sessions can't log in at the same time. Start the expiry session, run its first three lines (`login exp`, `exchange exp-gw`, `lifetimes`), start `wait-expiry exp-gw`, and only then open the main session.
+6. T4 also needs a pause of at least 10 minutes in the main session, for [idle or absolute](t4-lifetime.md#31-days-idle-or-absolute). Count it next to the hour of the expiry part.
 
-Terminal 1, the services. Their logs show decoded claims only:
+Terminal 1, the services. Their logs show decoded claims only. Build first: the mock stack builds the image under the same tag, and an image from before a `git pull` would otherwise run old code without notice:
 
 ```sh
+docker compose -f compose.lslogin.yaml build
 docker compose -f compose.lslogin.yaml up -d --wait services
 docker compose -f compose.lslogin.yaml logs -f services
 ```
@@ -40,7 +42,7 @@ Then, all in that one session, as later tests use the tokens of earlier ones: T1
 
 Tokens may expire during the session, as exchanged tokens are expected to live 1 hour ([A7](../testbed/assumptions.md#assumptions)). T4 and T5 start with new ones. If an exchange is refused or a call gives 401 with the reason `expired`, check `seconds_left` in `lifetimes` before you record it as a result.
 
-Afterwards:
+Afterwards, in each session (the main one and the expiry session):
 
 ```text
 quit
@@ -50,7 +52,7 @@ quit
 docker compose -f compose.lslogin.yaml down -v
 ```
 
-Then delete `lslogin.env`, and `results/` once you've taken what you need: it holds decoded claims of the accounts used. Fill in the Result column of each test's "What to record", take what you need into [Results](../outcomes/results.md), and update the "To check" list of [proTES #391](https://github.com/elixir-cloud-aai/proTES/issues/391).
+Then delete `lslogin.env`, and `results/` once you've taken what you need: both `results/session.jsonl` and `results/expiry.jsonl` hold decoded claims of the accounts used. Fill in the Result column of each test's "What to record", take what you need into [Results](../outcomes/results.md), and update the "To check" list of [proTES #391](https://github.com/elixir-cloud-aai/proTES/issues/391).
 
 To run the same against the mock, leave out `-f compose.lslogin.yaml`. Everything works, but see the table above for what it means.
 
@@ -130,7 +132,7 @@ For [delegated access](../testbed/delegated-access.md#user-control), a user shou
 - Does logging out at LS Login end refresh tokens?
 - **If neither:** only the service itself can stop further refreshes, by revoking at `/oidc/revoke`, and Conquest's docs have to say so to users. Either way, access tokens already issued stay usable until they expire, as services validate them offline ([Delegated access](../testbed/delegated-access.md#user-control)).
 
-Checking it by hand ends the session's refresh tokens, so do it last, if at all: revoke the consent of the client in the profile, then try `refresh` once more.
+Checking it by hand ends the refresh tokens of both sessions, as both log in account A with `tx-test-client`. So do it last, if at all, after the expiry session's [binding and reuse](t4-lifetime.md#binding-and-reuse) lines have run: see [Revoking consent](t5-attribution.md#revoking-consent-last), at the end of T5.
 
 ### Can registration be automated?
 

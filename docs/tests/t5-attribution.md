@@ -48,6 +48,21 @@ Then look for it in the services' logs:
 docker compose -f compose.lslogin.yaml logs services
 ```
 
+### Revoking consent, last
+
+Optional, and only after every other step of T1-T5, in both sessions, including T4's [binding and reuse](t4-lifetime.md#binding-and-reuse): it ends the refresh tokens of both, as both log in account A with `tx-test-client` ([Can users see and revoke what a service holds?](index.md#can-users-see-and-revoke-what-a-service-holds)). In the profile of account A, revoke the consent of the client. Then, in the main session, refresh from its newest refresh token, `r3` from [Hop limit](#hop-limit), right away, and again 5 minutes later, so that a delayed revocation shows:
+
+```text
+tb> refresh rv1 --as client --from r3
+tb> refresh rv2 --as client --from r3
+```
+
+If `rv1` worked and showed `refresh_token_rotated: true`, use `--from rv1` for the second one. In the expiry session, refresh once, too, from its newest refresh token (`exp-after`, or `exp2` if you logged in again):
+
+```text
+tb> refresh rv-exp --as client --from exp-after
+```
+
 ## Questions it answers
 
 ### Is `act` coming?
@@ -65,4 +80,5 @@ The LS Login team says that it's under consideration (2026-11-03, [C1](../testbe
 | Accounting | `client_id` at the node on both paths | |
 | Hop limit | Status for 0 and 1 | |
 | Tracing | Whether the logs of the gateway and the node both show this `traceparent` | |
+| Revoking consent | Whether `rv1`, `rv2` and `rv-exp` were refused, with errors, and the time between revoking and each | |
 | `act` | The LS Login team's answer | |

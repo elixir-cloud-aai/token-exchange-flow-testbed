@@ -26,7 +26,7 @@ tb> clients
 tb> discovery
 ```
 
-Provider `lslogin`, `ls_login_rules_emulated: false`, all five clients, and token exchange among the grant types. Note which of `entitlements` and `eduperson_entitlement` are in `scopes_supported` and `claims_supported`: the node reads both claims ([T3](t3-groups.md)). No testbed rule applies from here on: refusals are LS Login's own, with `refused_by: provider`.
+Provider `lslogin`, `ls_login_rules_emulated: false`, four or five clients (five with the public client), and token exchange among the grant types. Note which of `entitlements` and `eduperson_entitlement` are in `scopes_supported` and `claims_supported`: the node reads both claims ([T3](t3-groups.md)). No testbed rule applies from here on: refusals are LS Login's own, with `refused_by: provider`.
 
 ### Login: user to client
 
@@ -67,6 +67,21 @@ tb> call gateway --token to-gw --save direct --traceparent 00-0af7651916cd43dd84
 
 The gateway validates the token, exchanges it for the node, and forwards the request. The result has one row per service. This is also the first real check that exchanged tokens pass FOCA's checks.
 
+### Hop 2: which form names the node
+
+The gateway's own exchange names the node as `TESTBED_TARGET_PARAM` says, by default its bare client ID (`audience`). If the gateway's registration only lists the node's URL form, hop 2 fails with `refused: exchange`. Either way, try each form as the gateway:
+
+```text
+tb> exchange t1-node-id --as gateway --from to-gw --audience @node
+tb> exchange t1-node-res --as gateway --from to-gw --resource @node
+tb> exchange t1-node-url --as gateway --from to-gw --resource @node.url
+tb> exchange t1-node-both --as gateway --from to-gw --audience @node --resource @node.url
+tb> show t1-node-id
+tb> call node --token t1-node-id
+```
+
+Use `show` and `call node` on one that worked, in place of `t1-node-id`. Then set `TESTBED_TARGET_PARAM` for T2-T5 in `lslogin.env`, and [restart the services](../setup/configuration.md#changing-settings-during-a-session): `audience` if the ID works in `audience`, `resource` if it only works in `resource`, `resource-url` if only the URL form does, `both` if only both together do. With `resource-url`, the gateway also gets a token with only its URL in `aud` in the orchestrator variant below, which it can't exchange again (expectation 5): a 502 there is then expected.
+
 ### Variant: client to orchestrator, orchestrator to gateway
 
 ```text
@@ -76,7 +91,7 @@ tb> call orchestrator --token to-orch --save chained
 
 ### Variant: public client to gateway
 
-The mock can't answer this, as it refuses it outright.
+The mock can't answer this, as it refuses it outright. Without a public client (`TESTBED_PUBLIC_CLIENT_ID` empty), skip it, and record "not registered".
 
 ```text
 tb> login pub --as public
@@ -129,6 +144,7 @@ Discovery at `/oidc/` lists the auth method `none`, and at `/cas/oidc` doesn't (
 | Hop 1 | Which parameter works, `aud`, `client_id`, `azp`, `exp` minus `iat`, `scope`, `typ` | |
 | URL form | `aud`, the status of the call | |
 | Hop 2 | `client_id` at each hop, `exp` minus `iat` at the node | |
+| Which form names the node | Which of the four exchanges worked, `aud` of that token, the status of `call node`, and the `TESTBED_TARGET_PARAM` set for T2-T5 | |
 | Orchestrator | Status, `aud` at each hop | |
-| Public client | Both results, and the error if any | |
+| Public client | Both results, and the error if any; "not registered" without a public client | |
 | Registration app | What it accepted, and anything that needed approval | |

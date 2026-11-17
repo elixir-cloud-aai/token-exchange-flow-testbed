@@ -81,7 +81,7 @@ Start this at least an hour before you need the result, in a second session, as 
 docker compose -f compose.lslogin.yaml run --rm session --record /results/expiry.jsonl
 ```
 
-Only one session can log in at a time, as they share the callback port. Log in with account A again, so that `sub` can be compared with the first login.
+Only one session can log in at a time, as they share the callback port, and it only listens during a `login`, for up to 5 minutes. So `login exp` must be done before the main session's `login user`, and the other way round: start this session first ([Order for a live session](index.md#order-for-a-live-session)). Log in with account A again, so that `sub` can be compared with the first login.
 
 ```text
 tb> login exp --as client
