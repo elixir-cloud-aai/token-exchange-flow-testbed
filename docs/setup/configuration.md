@@ -28,6 +28,7 @@ All settings are environment variables.
 | `TESTBED_GATEWAY_RESOURCE` | The same for the gateway | |
 | `TESTBED_ORCHESTRATOR_RESOURCE` | The same for the orchestrator | |
 | `TESTBED_REQUIRED_ENTITLEMENT` | The value that the node's policy requires, from any entitlement or capability; empty for no policy. `ECP_CLN` in the template is an example | On the mock: a made-up one |
+| `TESTBED_ENTITLEMENT_CLAIMS` | Claims of user info that the node reads entitlements from, comma-separated. It takes the union of their values, and its row names the claims that were there (`entitlement_claims`). A claim of another type is skipped and named in `entitlements_error`: then only the other claims can allow the user, and without the entitlement in them, the node answers 502. Applies to the mock, too, which releases `entitlements`. LS Login's docs name `entitlements`; other clients of the same issuer got `eduperson_entitlement` ([What we've seen](../testbed/assumptions.md#what-weve-seen)) | `entitlements,eduperson_entitlement` |
 | `TESTBED_TARGET_PARAM` | How services name their next hop in exchanges: see below | `audience` |
 | `TESTBED_EXCHANGE_SCOPE` | `scope` that services request in exchanges; empty for none | |
 | `TESTBED_ISSUER` | Issuer, exactly as in tokens. For trying another stack, e.g., `https://login.aai.lifescience-ri.eu/cas/oidc` (never tried) | `https://login.aai.lifescience-ri.eu/oidc/` |

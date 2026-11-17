@@ -36,7 +36,7 @@ With the orchestrator in the chain, the client exchanges for the orchestrator, a
 ## What the services do
 
 - **Validation:** as in FOCA's `foca.security.auth._validate()` with its defaults (checked against FOCA 0.19.0): trusted issuer, `typ` is `at+jwt`, discovery, signature (RS256), `exp`, `iat`, `iss`, `sub`, `aud`, no leeway. Unlike FOCA, it tells the caller the reason.
-- **Node:** validates, reads entitlements from user info, applies its own policy (403 without the group, 502 if user info gives no answer), reports what it saw.
+- **Node:** validates, reads entitlements from user info (both `entitlements` and `eduperson_entitlement` by default), applies its own policy (403 without the group, 502 if user info gives no answer), reports what it saw.
 - **Gateway:** validates, exchanges the token for the next hop, forwards, reports all hops. With another role, the same code is the orchestrator. Authorisation at the gateway only covers who may use the gateway.
 - **`Hop-Limit` header:** further forwards allowed, by default 8; at 0 a forwarding service answers 508. It's custom, as `Max-Forwards` only applies to TRACE and OPTIONS.
 - **`traceparent`:** valid [W3C Trace Context](https://www.w3.org/TR/trace-context/) values pass through unchanged, others are replaced.

@@ -100,6 +100,20 @@ def test_hop_rows_handles_refusals() -> None:
     rows = hop_rows({"service": "node", "refused": "token", "reason": "audience"})
     assert rows[0]["reason"] == "audience"
     assert rows[0]["sub"] is None
+    assert rows[0]["entitlement_claims"] is None
+
+
+def test_hop_rows_name_the_entitlement_claims() -> None:
+    """T3 records which claim the node read entitlements from."""
+    entitlements = {
+        "values": ["urn:a"],
+        "claims": ["eduperson_entitlement"],
+        "error": "entitlements: not a list of strings",
+    }
+    rows = hop_rows({"service": "node", "entitlements": entitlements})
+    assert rows[0]["entitlements"] == ["urn:a"]
+    assert rows[0]["entitlement_claims"] == ["eduperson_entitlement"]
+    assert rows[0]["entitlements_error"] == "entitlements: not a list of strings"
 
 
 def test_tamper_changes_only_the_signature(provider: FakeProvider) -> None:
@@ -658,6 +672,19 @@ def test_provider_problems_are_named(session: Session, provider: FakeProvider) -
     discovery = f"{provider.issuer.rstrip('/')}/.well-known"
     provider.routes[discovery] = lambda _url, _options: FakeResponse(500)
     assert "Discovery failed" in session.execute("discovery")["provider_problem"]
+
+
+def test_discovery_shows_scopes_and_claims(
+    session: Session, provider: FakeProvider
+) -> None:
+    """T1 records which entitlement scope and claim the provider advertises."""
+    provider.discovery_overrides = {
+        "scopes_supported": ["openid", "eduperson_entitlement"],
+        "claims_supported": ["sub", "eduperson_entitlement"],
+    }
+    result = session.execute("discovery")
+    assert result["scopes_supported"] == ["openid", "eduperson_entitlement"]
+    assert result["claims_supported"] == ["sub", "eduperson_entitlement"]
 
 
 def test_parser_never_exits() -> None:

@@ -26,6 +26,9 @@ LS_LOGIN_REQUIRED_ROLES = ("client", "orchestrator", "gateway", "node")
 SERVICE_PORTS = {"gateway": 18991, "node": 18992, "orchestrator": 18993, "loop": 18995}
 NEXT_HOP = {"orchestrator": "gateway", "gateway": "node", "loop": "loop"}
 TARGET_PARAMS = ("audience", "resource", "resource-url", "both")
+# The claim of AARC-G069 and the operator's Entitlements page, and the one that
+# LS Login released to other clients of the same issuer
+ENTITLEMENT_CLAIMS = ("entitlements", "eduperson_entitlement")
 
 
 @dataclass(frozen=True)
@@ -60,6 +63,8 @@ class Settings:
         algorithms: Accepted signature algorithms.
         token_types: Accepted values of the `typ` header.
         required_entitlement: Entitlement that the node requires, if any.
+        entitlement_claims: Claims of user info that hold entitlements; the
+            node takes the union of their values.
         target_param: Which parameters services name their next hop with in
             exchanges: `audience`, `resource`, `resource-url` or `both`.
         exchange_scope: `scope` that services request in exchanges, if any.
@@ -75,6 +80,7 @@ class Settings:
     algorithms: tuple[str, ...] = ("RS256",)
     token_types: tuple[str, ...] = ("at+jwt", "application/at+jwt")
     required_entitlement: str | None = None
+    entitlement_claims: tuple[str, ...] = ENTITLEMENT_CLAIMS
     target_param: str = "audience"
     exchange_scope: str | None = None
     callback_bind: str = "localhost"
@@ -146,6 +152,7 @@ def _mock_settings(env: Mapping[str, str]) -> Settings:
         required_entitlement=(
             env.get("TESTBED_REQUIRED_ENTITLEMENT", MOCK_ENTITLEMENT) or None
         ),
+        entitlement_claims=_entitlement_claims(env),
         target_param=_target_param(env),
         exchange_scope=env.get("TESTBED_EXCHANGE_SCOPE") or None,
         callback_bind=env.get("TESTBED_CALLBACK_BIND") or "localhost",
@@ -168,6 +175,28 @@ def _target_param(env: Mapping[str, str]) -> str:
     if value not in TARGET_PARAMS:
         raise ValueError(f"TESTBED_TARGET_PARAM must be one of {TARGET_PARAMS}")
     return value
+
+
+def _entitlement_claims(env: Mapping[str, str]) -> tuple[str, ...]:
+    """Get the claims of user info that hold entitlements.
+
+    Args:
+        env: Environment variables.
+
+    Returns:
+        Claim names, without repeats, in the order given; both known names if
+        the variable is unset or empty.
+
+    Raises:
+        ValueError: The value holds no claim name.
+    """
+    value = env.get("TESTBED_ENTITLEMENT_CLAIMS")
+    if not value:
+        return ENTITLEMENT_CLAIMS
+    names = tuple(dict.fromkeys(n.strip() for n in value.split(",") if n.strip()))
+    if not names:
+        raise ValueError("TESTBED_ENTITLEMENT_CLAIMS names no claim")
+    return names
 
 
 def _ls_login_settings(env: Mapping[str, str]) -> Settings:
@@ -216,6 +245,7 @@ def _ls_login_settings(env: Mapping[str, str]) -> Settings:
         clients=clients,
         algorithms=tuple(env.get("TESTBED_ALGORITHMS", "RS256").split(",")),
         required_entitlement=env.get("TESTBED_REQUIRED_ENTITLEMENT") or None,
+        entitlement_claims=_entitlement_claims(env),
         target_param=target_param,
         exchange_scope=env.get("TESTBED_EXCHANGE_SCOPE") or None,
         callback_bind=env.get("TESTBED_CALLBACK_BIND") or "localhost",

@@ -110,29 +110,52 @@ class Service:
     def _entitlements(self, token: str, claims: dict[str, Any]) -> dict[str, Any]:
         """Get the user's entitlements from user info, as computed for this token.
 
+        The values are the union of all configured claims, in order of
+        appearance, as providers differ in the claim they release them in. A
+        claim that is `null` counts as absent. A claim of another type is
+        skipped and named in `error`: the policy then allows the user only if
+        another claim holds the entitlement, and otherwise makes no decision.
+
         Args:
             token: Validated access token.
             claims: Verified claims of the token.
 
         Returns:
-            Entitlements, or the reason why there are none to show.
+            Entitlements, the names of the claims they were read from, and the
+            reason why some or all couldn't be read, if any.
         """
         try:
             userinfo = self.tokens.userinfo(token)
         except Refused as exc:
-            return {"values": [], "error": exc.view()}
+            return {"values": [], "claims": [], "error": exc.view()}
         except Exception:
             logger.exception("User info request failed")
-            return {"values": [], "error": "user info request failed"}
+            return {"values": [], "claims": [], "error": "user info request failed"}
         if userinfo.get("sub") != claims.get("sub"):
-            return {"values": [], "error": "user info is about another subject"}
-        found = userinfo.get("entitlements", [])
-        found = [found] if isinstance(found, str) else found
-        if not isinstance(found, list) or not all(
-            isinstance(item, str) for item in found
-        ):
-            return {"values": [], "error": "entitlements is not a list of strings"}
-        return {"values": found}
+            return {
+                "values": [],
+                "claims": [],
+                "error": "user info is about another subject",
+            }
+        values: dict[str, None] = {}
+        sources = []
+        invalid = []
+        for name in self.settings.entitlement_claims:
+            found = userinfo.get(name)
+            if found is None:
+                continue
+            found = [found] if isinstance(found, str) else found
+            if not isinstance(found, list) or not all(
+                isinstance(item, str) for item in found
+            ):
+                invalid.append(name)
+                continue
+            sources.append(name)
+            values.update(dict.fromkeys(found))
+        result: dict[str, Any] = {"values": list(values), "claims": sources}
+        if invalid:
+            result["error"] = f"{', '.join(invalid)}: not a list of strings"
+        return result
 
     def check(self, headers: Any) -> RequestContext:
         """Check an incoming request.
@@ -195,7 +218,8 @@ class Service:
 
         A user without the entitlement is told so (403) rather than treated as
         unauthenticated (401), so that portals can offer a way to get access. If
-        user info gave no answer, nobody knows, so that isn't a 403 (502).
+        the entitlements couldn't be fully read, and those that could don't hold
+        it, nobody knows, so that isn't a 403 (502).
 
         Args:
             report: Report of the service, updated with the decision.

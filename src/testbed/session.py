@@ -129,6 +129,7 @@ def hop_rows(report: dict[str, Any]) -> list[dict[str, Any]]:
                 "scope": claims.get("scope"),
                 "lifetime": current.get("lifetime", {}).get("exp_minus_iat"),
                 "entitlements": current.get("entitlements", {}).get("values"),
+                "entitlement_claims": current.get("entitlements", {}).get("claims"),
                 "entitlements_error": current.get("entitlements", {}).get("error"),
                 "policy": current.get("policy"),
                 "hop_limit": current.get("hop_limit"),
@@ -670,6 +671,8 @@ class Session:
             "device_authorization_endpoint",
             "introspection_endpoint",
             "revocation_endpoint",
+            "scopes_supported",
+            "claims_supported",
         )
         return {"ok": True, **{key: document.get(key) for key in fields}}
 
