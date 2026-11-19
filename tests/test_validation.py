@@ -8,8 +8,9 @@ import jwt
 import pytest
 from cryptography.hazmat.primitives.asymmetric import rsa
 
+from testbed.settings import load_settings
 from testbed.validation import InvalidToken, TokenValidator, discover
-from tests.conftest import FakeProvider, FakeResponse
+from tests.conftest import LS_ENV, FakeProvider, FakeResponse
 
 
 def _validator(provider: FakeProvider) -> TokenValidator:
@@ -77,6 +78,42 @@ def test_refused_claims(
 def test_refused_type(provider: FakeProvider, typ: str) -> None:
     """Other JWTs of the issuer, e.g., ID tokens, are refused."""
     assert _reason(provider, provider.mint(typ=typ)) == "type"
+
+
+def _configured_validator(provider: FakeProvider, types: str) -> TokenValidator:
+    """Create a validator for the node, with `TESTBED_TOKEN_TYPES` set.
+
+    Args:
+        provider: Fake provider.
+        types: Value of `TESTBED_TOKEN_TYPES`.
+
+    Returns:
+        Validator with the token types of the settings.
+    """
+    settings = load_settings({**LS_ENV, "TESTBED_TOKEN_TYPES": types}, "lslogin")
+    return TokenValidator(
+        [provider.issuer], ["id-node"], provider, token_types=settings.token_types
+    )
+
+
+@pytest.mark.parametrize("typ", ["JWT", "jwt", "at+jwt", "application/at+jwt"])
+def test_configured_token_types_are_accepted(provider: FakeProvider, typ: str) -> None:
+    """With `TESTBED_TOKEN_TYPES` naming `JWT`, such tokens pass, in any case.
+
+    Args:
+        provider: Fake provider.
+        typ: Value of the `typ` header.
+    """
+    validator = _configured_validator(provider, "at+jwt,application/at+jwt,JWT")
+    assert validator.validate(provider.mint(typ=typ))["sub"] == "user-1"
+
+
+def test_configured_token_types_replace_the_default(provider: FakeProvider) -> None:
+    """Types missing from `TESTBED_TOKEN_TYPES` are refused, even `at+jwt`."""
+    validator = _configured_validator(provider, "JWT")
+    with pytest.raises(InvalidToken) as caught:
+        validator.validate(provider.mint(typ="at+jwt"))
+    assert caught.value.reason == "type"
 
 
 def test_no_type_is_refused(provider: FakeProvider) -> None:

@@ -33,6 +33,7 @@ All settings are environment variables.
 | `TESTBED_EXCHANGE_SCOPE` | `scope` that services request in exchanges; empty for none | |
 | `TESTBED_ISSUER` | Issuer, exactly as in tokens. For trying another stack, e.g., `https://login.aai.lifescience-ri.eu/cas/oidc` (never tried) | `https://login.aai.lifescience-ri.eu/oidc/` |
 | `TESTBED_ALGORITHMS` | Accepted signature algorithms, comma-separated | `RS256` |
+| `TESTBED_TOKEN_TYPES` | Accepted values of the `typ` header, comma-separated, in any case; LS Login only. Set but empty is an error, as it would refuse every token. See [Token types](#token-types) | `at+jwt,application/at+jwt` |
 | `TESTBED_CALLBACK_BIND` | Address that the login callback listens on. `compose.lslogin.yaml` sets it, as published ports don't arrive on a container's loopback interface | `localhost` |
 | `TESTBED_DOCS` | Folder of the docs, for the end-to-end run. The image sets it | `docs` |
 
@@ -44,6 +45,16 @@ Values of `TESTBED_TARGET_PARAM`:
 | `resource` | | Client ID |
 | `resource-url` | | URL form |
 | `both` | Client ID | URL form |
+
+## Token types
+
+By default, services accept only the access token types of [RFC 9068](https://datatracker.ietf.org/doc/html/rfc9068), `at+jwt` and `application/at+jwt`, as FOCA does. On LS Login, exchanged tokens carry `typ: JWT`, and so do login tokens of its new proxy ([T1](../tests/t1-call-chain.md#do-exchanged-tokens-have-the-same-typ-alg-and-keys-as-login-tokens)). Services refuse them with the reason `type`. To accept them, add `JWT` in `lslogin.env`:
+
+```sh
+TESTBED_TOKEN_TYPES=at+jwt,application/at+jwt,JWT
+```
+
+The trade-off: `typ` is what keeps out other JWTs of the same issuer, such as ID tokens, which are signed with the same keys. With `JWT` accepted, `aud` is the only check that tells them apart: an ID token issued to a service's own client ID then passes as an access token for it. Keep the default wherever the provider issues `at+jwt`. FOCA services need the same change, in `security.auth.token_types`.
 
 ## Changing settings during a session
 
