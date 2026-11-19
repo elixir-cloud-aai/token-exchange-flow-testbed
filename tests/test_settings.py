@@ -116,6 +116,12 @@ def test_token_types_default_to_rfc_9068() -> None:
     assert settings.token_types == ("at+jwt", "application/at+jwt")
 
 
+def test_token_types_are_for_ls_login_only() -> None:
+    """The mock issues `at+jwt`, so it ignores the variable."""
+    settings = load_settings({"TESTBED_TOKEN_TYPES": "JWT"}, "mock")
+    assert settings.token_types == ("at+jwt", "application/at+jwt")
+
+
 def test_token_types_are_a_comma_separated_list() -> None:
     """Spaces, empty items and repeats in any case are ignored."""
     env = {**LS_ENV, "TESTBED_TOKEN_TYPES": " at+jwt , ,JWT,AT+JWT,jwt "}

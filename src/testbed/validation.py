@@ -13,6 +13,7 @@ from typing import Any, Protocol
 import jwt
 
 from testbed.redact import scrub, unverified_claims
+from testbed.settings import TOKEN_TYPES
 
 logger = logging.getLogger(__name__)
 TIMEOUT = 10
@@ -103,7 +104,7 @@ class TokenValidator:
         audience: Sequence[str],
         http: HttpClient,
         algorithms: Sequence[str] = ("RS256",),
-        token_types: Sequence[str] = ("at+jwt", "application/at+jwt"),
+        token_types: Sequence[str] = TOKEN_TYPES,
     ) -> None:
         """Create the validator.
 
