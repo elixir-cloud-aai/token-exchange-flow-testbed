@@ -26,6 +26,8 @@ LS_LOGIN_REQUIRED_ROLES = ("client", "orchestrator", "gateway", "node")
 SERVICE_PORTS = {"gateway": 18991, "node": 18992, "orchestrator": 18993, "loop": 18995}
 NEXT_HOP = {"orchestrator": "gateway", "gateway": "node", "loop": "loop"}
 TARGET_PARAMS = ("audience", "resource", "resource-url", "both")
+# The types of RFC 9068, as FOCA accepts them by default
+TOKEN_TYPES = ("at+jwt", "application/at+jwt")
 # The claim of AARC-G069 and the operator's Entitlements page, and the one that
 # LS Login released to other clients of the same issuer
 ENTITLEMENT_CLAIMS = ("entitlements", "eduperson_entitlement")
@@ -78,7 +80,7 @@ class Settings:
     trusted_issuers: tuple[str, ...]
     clients: dict[str, Client]
     algorithms: tuple[str, ...] = ("RS256",)
-    token_types: tuple[str, ...] = ("at+jwt", "application/at+jwt")
+    token_types: tuple[str, ...] = TOKEN_TYPES
     required_entitlement: str | None = None
     entitlement_claims: tuple[str, ...] = ENTITLEMENT_CLAIMS
     target_param: str = "audience"
@@ -199,6 +201,33 @@ def _entitlement_claims(env: Mapping[str, str]) -> tuple[str, ...]:
     return names
 
 
+def _token_types(env: Mapping[str, str]) -> tuple[str, ...]:
+    """Get the accepted values of the `typ` header.
+
+    Args:
+        env: Environment variables.
+
+    Returns:
+        Types, in the order given, without repeats in any case, as services
+        compare them case-insensitively; those of RFC 9068 if the variable is
+        unset.
+
+    Raises:
+        ValueError: The variable is set but names no type, which would refuse
+            every token.
+    """
+    value = env.get("TESTBED_TOKEN_TYPES")
+    if value is None:
+        return TOKEN_TYPES
+    types: dict[str, str] = {}
+    for name in value.split(","):
+        if name.strip():
+            types.setdefault(name.strip().lower(), name.strip())
+    if not types:
+        raise ValueError("TESTBED_TOKEN_TYPES names no type")
+    return tuple(types.values())
+
+
 def _ls_login_settings(env: Mapping[str, str]) -> Settings:
     """Create settings for LS Login, from the environment.
 
@@ -209,7 +238,8 @@ def _ls_login_settings(env: Mapping[str, str]) -> Settings:
         Settings.
 
     Raises:
-        ValueError: Required variables are missing. Names only, no values.
+        ValueError: Required variables are missing, or a value is invalid.
+            Names only, no values.
     """
     missing = [
         f"TESTBED_{role.upper()}_CLIENT_ID"
@@ -244,6 +274,7 @@ def _ls_login_settings(env: Mapping[str, str]) -> Settings:
         trusted_issuers=(issuer,),
         clients=clients,
         algorithms=tuple(env.get("TESTBED_ALGORITHMS", "RS256").split(",")),
+        token_types=_token_types(env),
         required_entitlement=env.get("TESTBED_REQUIRED_ENTITLEMENT") or None,
         entitlement_claims=_entitlement_claims(env),
         target_param=target_param,

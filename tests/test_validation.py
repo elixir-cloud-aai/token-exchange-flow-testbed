@@ -8,8 +8,9 @@ import jwt
 import pytest
 from cryptography.hazmat.primitives.asymmetric import rsa
 
+from testbed.settings import load_settings
 from testbed.validation import InvalidToken, TokenValidator, discover
-from tests.conftest import FakeProvider, FakeResponse
+from tests.conftest import LS_ENV, FakeProvider, FakeResponse
 
 
 def _validator(provider: FakeProvider) -> TokenValidator:
@@ -77,6 +78,18 @@ def test_refused_claims(
 def test_refused_type(provider: FakeProvider, typ: str) -> None:
     """Other JWTs of the issuer, e.g., ID tokens, are refused."""
     assert _reason(provider, provider.mint(typ=typ)) == "type"
+
+
+def test_configured_token_types_are_accepted(provider: FakeProvider) -> None:
+    """With `TESTBED_TOKEN_TYPES` naming `JWT`, such tokens pass, in any case."""
+    env = {**LS_ENV, "TESTBED_TOKEN_TYPES": "at+jwt,application/at+jwt,JWT"}
+    settings = load_settings(env, "lslogin")
+    validator = TokenValidator(
+        [provider.issuer], ["id-node"], provider, token_types=settings.token_types
+    )
+    for typ in ("JWT", "jwt", "at+jwt"):
+        assert validator.validate(provider.mint(typ=typ))["sub"] == "user-1"
+    assert _reason(provider, provider.mint(typ="JWT")) == "type"
 
 
 def test_no_type_is_refused(provider: FakeProvider) -> None:

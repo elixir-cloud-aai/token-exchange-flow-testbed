@@ -108,3 +108,26 @@ def test_entitlement_claims_are_a_comma_separated_list() -> None:
     assert load_settings(env, "lslogin").entitlement_claims == ("a", "b")
     with pytest.raises(ValueError, match="TESTBED_ENTITLEMENT_CLAIMS"):
         load_settings({**LS_ENV, "TESTBED_ENTITLEMENT_CLAIMS": " , "}, "lslogin")
+
+
+def test_token_types_default_to_rfc_9068() -> None:
+    """Unset, LS Login accepts only the types of RFC 9068."""
+    settings = load_settings(LS_ENV, "lslogin")
+    assert settings.token_types == ("at+jwt", "application/at+jwt")
+
+
+def test_token_types_are_a_comma_separated_list() -> None:
+    """Spaces, empty items and repeats in any case are ignored."""
+    env = {**LS_ENV, "TESTBED_TOKEN_TYPES": " at+jwt , ,JWT,AT+JWT,jwt "}
+    assert load_settings(env, "lslogin").token_types == ("at+jwt", "JWT")
+
+
+@pytest.mark.parametrize("value", ["", " , "], ids=["empty", "only commas"])
+def test_empty_token_types_are_refused(value: str) -> None:
+    """A value that names no type would refuse every token: an error.
+
+    Args:
+        value: Value of the variable.
+    """
+    with pytest.raises(ValueError, match="TESTBED_TOKEN_TYPES"):
+        load_settings({**LS_ENV, "TESTBED_TOKEN_TYPES": value}, "lslogin")
