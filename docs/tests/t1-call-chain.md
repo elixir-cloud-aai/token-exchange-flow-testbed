@@ -9,8 +9,8 @@ One login, then one exchange per hop, up to the node. This is the central questi
 ## Expectations
 
 1. Login gives `typ: at+jwt`, `aud` with the client's ID (our own observation, 2026-10-20), a `sub` that is the same for the same account (the LS Login team, 2026-11-03; compared in [T4](t4-lifetime.md#expired-token)), and a refresh token, as `offline_access` is requested.
-2. After each exchange, `sub` hasn't changed, and `aud` holds only the next hop's ID.
-3. A call through the gateway gives 200: the gateway sees `aud` = gateway, the node sees `aud` = node, with the same `sub` and `traceparent`, hop limit 8 then 7, and `act: null`. Without the group, the node answers 403, or 502 with `refused: userinfo` if user info gives no answer. The rows are still valid, and [T3](t3-groups.md) goes into why.
+2. After each exchange, `sub` hasn't changed, and `aud` holds the next hop's ID and, according to the LS Login team (2026-11-19, [A19](../testbed/assumptions.md#assumptions)), the exchanging client's ID as well. If `aud` holds only the next hop's ID, record that as a difference.
+3. A call through the gateway gives 200: the gateway sees its ID in `aud`, the node sees its own, with the same `sub` and `traceparent`, hop limit 8 then 7, and `act: null`. Without the group, the node answers 403, or 502 with `refused: userinfo` if user info gives no answer. The rows are still valid, and [T3](t3-groups.md) goes into why.
 4. Through the orchestrator, too: 200 (or as above) over three services, with `aud` changing at each.
 5. A token with only a URL in `aud` is accepted by the gateway, but LS Login refuses its next exchange, which the gateway reports as 502. This follows from the `aud` rule ([A3](../testbed/assumptions.md#assumptions)).
 6. Exchanged tokens pass the same checks as in FOCA.

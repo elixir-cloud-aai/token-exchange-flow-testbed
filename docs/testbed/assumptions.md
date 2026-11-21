@@ -1,6 +1,6 @@
 # Assumptions and constraints
 
-All LS Login specifics are on this page. Other pages refer to its numbers. Most of it comes from the LS Login team's answers, and the [tests](../tests/index.md) check it with exchanges.
+All LS Login specifics are on this page. Other pages refer to its numbers. Most of it comes from the LS Login team's answers. None of it has been checked against LS Login yet, which is what the [tests](../tests/index.md) are for.
 
 ## Assumptions
 

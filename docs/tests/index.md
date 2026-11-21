@@ -126,11 +126,11 @@ A page of the operator names that issuer for another node, and the discovery doc
 
 ### Can users see and revoke what a service holds?
 
-For [delegated access](../testbed/delegated-access.md#user-control), a user should be able to see that Conquest may act for them, and withdraw that at LS Login. The profile has "Revoke consent" per service ([C12](../testbed/assumptions.md#constraints)).
+For [delegated access](../testbed/delegated-access.md#user-control), a user should be able to see that Conquest may act for them, and withdraw that at LS Login. The LS Login team answered on 2026-11-19 ([A20](../testbed/assumptions.md#assumptions), [A21](../testbed/assumptions.md#assumptions)): users probably can't review the grants they gave a service; they can revoke their tokens themselves; consent can only be revoked through a support request; and refresh tokens probably stay valid when the user logs out. The operator's privacy page, on the other hand, describes a "Revoke consent" button per service in the profile ([C12](../testbed/assumptions.md#constraints)). Still open:
 
-- Does it also end the refresh tokens that the service holds? And the access tokens issued with them?
-- Does logging out at LS Login end refresh tokens?
-- **If neither:** only the service itself can stop further refreshes, by revoking at `/oidc/revoke`, and Conquest's docs have to say so to users. Either way, access tokens already issued stay usable until they expire, as services validate them offline ([Delegated access](../testbed/delegated-access.md#user-control)).
+- Revoking a user's own tokens, revoking consent and revoking a service's refresh tokens are three different things. Where do users revoke their tokens, and does that, or revoking consent, end the refresh tokens that the service holds? And the access tokens issued with them?
+- Logout: the answer is "probably not", and nobody has checked it.
+- **If neither ends them:** only the service itself can stop further refreshes, by revoking at `/oidc/revoke`, and Conquest's docs have to say so to users. Either way, access tokens already issued stay usable until they expire, as services validate them offline ([Delegated access](../testbed/delegated-access.md#user-control)).
 
 Checking it by hand ends the refresh tokens of both sessions, as both log in account A with `tx-test-client`. So do it last, if at all, after the expiry session's [binding and reuse](t4-lifetime.md#binding-and-reuse) lines have run: see [Revoking consent](t5-attribution.md#revoking-consent-last), at the end of T5.
 

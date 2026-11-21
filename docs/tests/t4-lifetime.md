@@ -133,7 +133,7 @@ Lifetimes stay configurable in FOCA either way, as the new stack will change the
 ### Are refresh tokens bound to the client, and is reuse detected?
 
 - **Bound:** a refresh token that leaks from the workflow system is of no use to another client without that client's secret, too. If not, a refresh token has to be treated like a password of the user's.
-- **Reuse detected:** a leaked refresh token that is used ends the run, too, so leaks show. FOCA's helper then reports that the grant has ended, rather than retrying.
+- **Reuse detected:** the LS Login team says reuse detection is enabled (2026-11-19, [A18](../testbed/assumptions.md#assumptions)), but not what it ends. A refused `exp-reuse` only shows that the reused token is refused. Only if `exp-after` is refused, too, does reuse end the whole grant: then a leaked refresh token that is used ends the run, so leaks show, and FOCA's helper reports that the grant has ended, rather than retrying. If `exp-after` still works, reuse ends nothing beyond the old token.
 - **Neither:** the 31 days are all that limits a leaked refresh token, unless it's revoked.
 
 ## What to record
