@@ -2,17 +2,17 @@
 
 Conquest runs a workflow for hours or days, long after the user's tokens have expired, and still has to start tasks on their behalf. Asking the user again every hour isn't practical once they've agreed to the whole run. Refreshing without a bounded, explicit grant isn't acceptable either. The [Design](../background/design.md#delegation-across-hops) describes the end state for this. This page takes its six points one by one: what each needs from the identity provider, what we know of LS Login, what the testbed does and shows, and what's open.
 
-!!! warning "Little of this is known for LS Login"
-    What we know of LS Login comes from its team's answers of 2026-11-03, its public discovery document and the operator's public pages, all under [Assumptions and constraints](assumptions.md), and is cited by number here. **Nothing on this page has run against LS Login.** Where we don't know, it says so. [T4](../tests/t4-lifetime.md) is where most of it gets answered.
+!!! warning "What's known of LS Login"
+    What we know of LS Login comes from its team's answers of 2026-11-03 and 2026-11-19, its public discovery document and the operator's public pages, all under [Assumptions and constraints](assumptions.md), and is cited by number here. Where we still don't know, it says so. [T4](../tests/t4-lifetime.md) checks most of it.
 
 ## Summary
 
 | Point | Needs from the identity provider | LS Login | Testbed |
 |---|---|---|---|
 | [Consent once](#consent-once-explicitly) | A consent page for offline access that names the workflow system and a duration | `offline_access` listed; what the consent page says about it is unknown | Requests `offline_access` at login; never logs users in at the orchestrator |
-| [Bounded grant](#bounded-grant) | Absolute lifetime per grant, rotation, reuse detection, binding to a confidential client | 31 days for all, idle or absolute unknown; rotation and reuse detection unknown; no sender-constrained tokens | Shows rotation and the 31 days' kind; checks binding and reuse detection |
-| [Least privilege downstream](#least-privilege-downstream) | Short-lived access tokens for one audience, by exchange or refresh | 1 hour; `aud` limited to registered targets | Services keep no refresh token, and pass on access tokens only |
-| [User control](#user-control) | A list of grants to revoke; a revocation endpoint | Revocation endpoint listed; "Revoke consent" in the profile, effect on refresh tokens unknown | Revokes, then checks that the refresh fails |
+| [Bounded grant](#bounded-grant) | Absolute lifetime per grant, rotation, reuse detection, binding to a confidential client | 31 days for all, idle, no absolute limit mentioned; rotation with reuse detection; no sender-constrained tokens | Shows rotation and the 31 days' kind; checks binding and reuse detection |
+| [Least privilege downstream](#least-privilege-downstream) | Short-lived access tokens for one audience, by exchange or refresh | 1 hour; `aud` holds the requested targets and the exchanging client | Services keep no refresh token, and pass on access tokens only |
+| [User control](#user-control) | A list of grants to revoke; a revocation endpoint | Revocation endpoint listed; grants not listed for users; consent revoked through support, or with a profile button (sources differ); refresh tokens survive logout | Revokes, then checks that the refresh fails |
 | [New consent only on change](#new-consent-only-on-change) | Refresh can't widen scope; new targets need new consent | Targets come from the client's registration, not from the user | Not tested |
 | [Delegation in tokens](#delegation-visible-in-tokens) | `act` | Not supported | Compares the paths, and relies on logs |
 
@@ -35,8 +35,8 @@ Conquest runs a workflow for hours or days, long after the user's tokens have ex
 
 **LS Login.**
 
-- **Lifetime:** 31 days "for now", the same for all, and configurable per service only in the new stack ([A6](assumptions.md#assumptions), [C5](assumptions.md#constraints)). A lifetime per run, from what the user agreed to, isn't offered. Whether the 31 days are idle or absolute, we don't know.
-- **Rotation and reuse detection:** unknown.
+- **Lifetime:** 31 days, the same for all, and configurable per service only in the new stack ([A6](assumptions.md#assumptions), [C5](assumptions.md#constraints)). It's idle: each refresh returns a new refresh token that lives another 31 days. An absolute limit on the grant as a whole wasn't mentioned (the LS Login team, 2026-11-19; [A17](assumptions.md#assumptions)). A lifetime per run, from what the user agreed to, isn't offered.
+- **Rotation and reuse detection:** both. Each refresh returns a new refresh token, and the one used is revoked; reuse detection is enabled (the LS Login team, 2026-11-19; [A18](assumptions.md#assumptions)). What reuse ends, the old token only or the whole grant, wasn't said: [T4](../tests/t4-lifetime.md#binding-and-reuse) shows it.
 - **Binding:** by client authentication only. The discovery document lists client secrets and `none`, and no DPoP or certificate-bound tokens ([C11](assumptions.md#constraints)). A public client's refresh token still belongs to its client ID, but without a secret, whoever holds it can redeem it as that client. So the workflow system must be a confidential client.
 
 **Testbed.**
@@ -46,13 +46,13 @@ Conquest runs a workflow for hours or days, long after the user's tokens have ex
 - [T4](../tests/t4-lifetime.md#binding-and-reuse) tries to redeem the client's refresh token as another client, and to reuse a rotated one.
 - On the mock, none of this is evidence: any client can redeem any refresh token, and nothing rotates or ends ([What the mock can't show](limits.md#what-the-mock-cant-show)).
 
-**Open.** With one lifetime for all, the workflow system can only end the grant earlier by itself: by revoking the refresh token when the run ends or its deadline has passed. That's a duty of Conquest's, not a limit the identity provider enforces.
+**Open.** With an idle limit only, nothing at the identity provider ends a grant that's in use: refreshed at least once a month, it goes on. With one lifetime for all, the workflow system can only end the grant earlier by itself: by revoking the refresh token when the run ends or its deadline has passed. That's a duty of Conquest's, not a limit the identity provider enforces.
 
 ## Least privilege downstream
 
 **What it needs.** The refresh token never leaves the workflow system. For each step, the workflow system gets a short-lived access token for the one TES or WES that step needs, by exchange ([RFC 8693](https://datatracker.ietf.org/doc/html/rfc8693)) or by a refresh limited to that target.
 
-**LS Login.** Exchanged tokens live "currently 1 hour" ([A7](assumptions.md#assumptions)), and their `aud` is checked against the targets registered for the exchanging client ([A2](assumptions.md#assumptions)). Whether `aud` then holds only that target is a question for [T1](../tests/t1-call-chain.md#questions-it-answers).
+**LS Login.** Exchanged tokens live "currently 1 hour" ([A7](assumptions.md#assumptions)), and their targets are checked against those registered for the exchanging client ([A2](assumptions.md#assumptions)). `aud` then holds the targets requested with `resource` or `audience`, **and** the client ID of the client that asked for the exchange (the LS Login team, 2026-11-19; [A19](assumptions.md#assumptions)). So an exchanged token isn't limited to the next hop: the service that obtained it would accept it as well, and so would any service that accepts tokens with its own ID among several audiences. [T1](../tests/t1-call-chain.md#what-to-record) shows it live.
 
 **Testbed.**
 
@@ -63,13 +63,15 @@ Conquest runs a workflow for hours or days, long after the user's tokens have ex
 
 **What it needs.** The user can see the grant at the identity provider, and revoke it there. Cancelling the run makes the workflow system revoke it, at the revocation endpoint ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009)).
 
-**LS Login.** Its discovery document lists `https://login.aai.lifescience-ri.eu/oidc/revoke` ([What we've seen](assumptions.md#what-weve-seen)). A user's profile lists the services they have consented to, with a "Revoke consent" button. Whether that also ends the service's refresh tokens, and whether users can see refresh tokens at all, nothing public says ([C12](assumptions.md#constraints)). [RFC 9700](https://datatracker.ietf.org/doc/html/rfc9700#section-4.14) also allows a provider to revoke refresh tokens at logout, which would end a run when the user logs out elsewhere. Whether LS Login does, we don't know.
+**LS Login.** Its discovery document lists `https://login.aai.lifescience-ri.eu/oidc/revoke` ([What we've seen](assumptions.md#what-weve-seen)). Users probably can't review the grants they gave a service, but they can revoke their tokens themselves; where, and whether that reaches a service's refresh tokens, wasn't said. Consent can only be revoked through a support request (the LS Login team, 2026-11-19). The operator's privacy page, on the other hand, describes a "Revoke consent" button in the profile ([C12](assumptions.md#constraints)), so that's still to be cleared up. Refresh tokens probably stay valid when the user logs out: users can have several sessions, and single logout across services isn't implemented (the LS Login team, 2026-11-19). A run therefore doesn't end when the user logs out elsewhere; it ends at expiry, 31 days after the last refresh, or when it's revoked.
 
 **Testbed.**
 
 - `revoke <name> --as <role> --refresh` sends the refresh token to the revocation endpoint. Its `ok` only means status 200, which RFC 7009 also returns for a token that wasn't valid. What counts is the refresh after it, which must fail: [T4](../tests/t4-lifetime.md#only-if-that-returned-one).
 - There are no workflows to cancel. Revoking `ro-b` in T4 stands for it.
 - **Revoking doesn't reach access tokens already issued.** The services validate access tokens offline, from signature and `exp`, as FOCA does. A gateway accepts a token issued before the revocation until it expires, up to an hour later ([A7](assumptions.md#assumptions)). Whether LS Login then refuses to exchange it, or the node's call to user info fails, depends on whether revoking a refresh token also revokes the access tokens issued with it. We don't know.
+
+**Open.** With no list of grants for users, the workflow system has to give users a way to stop a run and revoke its access, and its docs have to say so.
 
 ## New consent only on change
 
@@ -89,13 +91,14 @@ Conquest runs a workflow for hours or days, long after the user's tokens have ex
 
 ## Questions for LS Login
 
-Still to find out from LS Login. Each test's page says what its answer changes.
+What we asked or tested, and what came of it. Each test's page says what its answer changes.
 
-| Question | Where it gets answered |
+| Question | Answer |
 |---|---|
-| Are the 31 days idle or absolute? | [T4](../tests/t4-lifetime.md#is-the-31-days-idle-or-absolute-and-do-refresh-tokens-rotate) |
-| Do refresh tokens rotate, and is reuse detected? | [T4](../tests/t4-lifetime.md#are-refresh-tokens-bound-to-the-client-and-is-reuse-detected) |
-| Can an exchange return a refresh token, limited to the next hop? | [T4](../tests/t4-lifetime.md#can-an-exchange-return-a-refresh-token-limited-to-the-next-hop) |
-| Can exchanged tokens be limited to one audience? | [T1](../tests/t1-call-chain.md#questions-it-answers) |
-| Does the consent page mention offline access, and for how long? | [T1](../tests/t1-call-chain.md#login-user-to-client), by looking |
-| Can users see and revoke a service's refresh tokens? | [Outside the tests](../tests/index.md#can-users-see-and-revoke-what-a-service-holds) |
+| Are the 31 days idle or absolute? | Idle: each refresh gives a new refresh token for another 31 days; an absolute limit wasn't mentioned (the LS Login team, 2026-11-19). [T4](../tests/t4-lifetime.md#is-the-31-days-idle-or-absolute-and-do-refresh-tokens-rotate) to confirm |
+| Do refresh tokens rotate, and is reuse detected? | Both are enabled; the used token is revoked at each refresh (the LS Login team, 2026-11-19). Binding to the client, and what reuse ends: [T4](../tests/t4-lifetime.md#are-refresh-tokens-bound-to-the-client-and-is-reuse-detected) |
+| Can an exchange return a refresh token, limited to the next hop? | Still open: not asked, as [T4](../tests/t4-lifetime.md#can-an-exchange-return-a-refresh-token-limited-to-the-next-hop) answers it |
+| Can exchanged tokens be limited to one audience? | No: `aud` holds the requested targets and the exchanging client (the LS Login team, 2026-11-19). [T1](../tests/t1-call-chain.md#what-to-record) to confirm |
+| Does the consent page mention offline access, and for how long? | Still open: [T1](../tests/t1-call-chain.md#login-user-to-client), by looking |
+| Can users see and revoke a service's refresh tokens? | Probably not see; users can revoke their tokens themselves, consent only through a support request (the LS Login team, 2026-11-19). Still open: where users revoke tokens, and whether that or revoking consent ends a service's refresh tokens |
+| Does logging out end refresh tokens? | Probably not; single logout across services isn't implemented (the LS Login team, 2026-11-19) |
